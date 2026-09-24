@@ -1,13 +1,13 @@
 # apps/web
 
-Application web **BizFlow** (usage propriétaire, grand écran).
+Application web **Korise** (usage propriétaire, grand écran).
 Stack : Next.js 15 (TypeScript) + Tailwind CSS + **export statique** (`output: 'export'`) —
 le build produit dans `out/`, qui est le même code encapsulé par `apps/desktop` via Tauri.
 Aucune fonctionnalité serveur (API routes / server actions / ISR) : toute la logique
 vit dans le backend FastAPI, appelé en REST depuis le client.
 
 Design : voir `../../documentation/DESIGN_SYSTEM.md` — Tailwind est configuré directement
-depuis `packages/shared/design-tokens.json` (`tailwind.config.js`), polices Manrope/Inter
+depuis `packages/shared/design-tokens.json` (`tailwind.config.js`), polices Signika/Urbanist
 via `next/font/google`, icônes `lucide-react` uniquement (zéro emoji).
 
 ## État actuel

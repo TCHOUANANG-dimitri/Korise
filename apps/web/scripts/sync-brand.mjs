@@ -9,7 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const srcDir = join(__dirname, '..', '..', '..', 'packages', 'shared', 'brand');
 const destDir = join(__dirname, '..', 'public', 'brand');
 
-const FILES = ['bizflow-logo-full.png', 'bizflow-icon.png'];
+const FILES = ['korise-logo-full.png', 'korise-icon.png'];
 
 mkdirSync(destDir, { recursive: true });
 for (const file of FILES) {

@@ -6,6 +6,7 @@ import { ArrowRight, Check, Copy, LogIn, Store } from 'lucide-react';
 
 import { ApiError, login, registerBusiness } from '../../lib/api';
 import { Session, setSession } from '../../lib/session';
+import { rememberPin } from '../../lib/lock';
 import Logo from '../components/Logo';
 
 type Mode = 'login' | 'register';
@@ -40,6 +41,7 @@ export default function LoginPage() {
     setBusy(true);
     try {
       const session = await login({ business_code: businessCode.trim().toUpperCase(), pin });
+      await rememberPin(session.user_id, pin);
       afterSuccess(session);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Connexion impossible.');
@@ -58,6 +60,7 @@ export default function LoginPage() {
         owner_phone: ownerPhone.trim() || undefined,
         pin: newPin,
       });
+      await rememberPin(session.user_id, newPin);
       setSession(session);
       setNewBusiness(session);
     } catch (err) {

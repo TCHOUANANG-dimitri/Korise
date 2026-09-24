@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Copy, Crown, RefreshCw, UserPlus, Users } from 'lucide-react';
+import { Check, CheckCircle2, Copy, Crown, FileText, RefreshCw, Settings2, UserPlus, UserX, Users } from 'lucide-react';
 
 import { useData } from '../../lib/useData';
-import { createEmployee, listEmployees, EmployeeApi } from '../../lib/api';
+import { createEmployee, listEmployees, openPdf, updateEmployee, EmployeeApi } from '../../lib/api';
 import { getSession } from '../../lib/session';
 
 const PIN_MIN = 4;
@@ -17,6 +17,36 @@ export default function TeamPage() {
   const [employees, setEmployees] = useState<EmployeeApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [actionFlash, setActionFlash] = useState<string | null>(null);
+
+  const savePerm = async (e: EmployeeApi, next: { can_view_purchase_prices: boolean; can_view_owner_dashboard: boolean }) => {
+    setSavingId(e.id);
+    try {
+      await updateEmployee(e.id, next);
+      setActionFlash(`Permissions de ${e.full_name} à jour.`);
+      window.setTimeout(() => setActionFlash(null), 4000);
+    } finally {
+      setSavingId(null);
+      setEditingId(null);
+      load();
+    }
+  };
+
+  const deactivate = async (e: EmployeeApi) => {
+    if (!window.confirm(`Désactiver le compte de ${e.full_name} ? Il ne pourra plus se connecter.`)) return;
+    setSavingId(e.id);
+    try {
+      await updateEmployee(e.id, { is_active: false });
+      setActionFlash(`${e.full_name} désactivé(e).`);
+      window.setTimeout(() => setActionFlash(null), 4000);
+    } finally {
+      setSavingId(null);
+      setEditingId(null);
+      load();
+    }
+  };
 
   const load = () => {
     setLoading(true);
@@ -58,6 +88,12 @@ export default function TeamPage() {
 
       {session && <BusinessCodeCard code={session.business_code} />}
 
+      {actionFlash && (
+        <div className="mb-4 flex items-center gap-2 rounded-field bg-success px-3 py-3 text-sm font-medium text-white">
+          <CheckCircle2 size={18} /> {actionFlash}
+        </div>
+      )}
+
       {open && <CreateEmployeeForm onCreated={() => { setOpen(false); load(); }} />}
 
       {employees.length === 0 && !loading && (
@@ -67,23 +103,101 @@ export default function TeamPage() {
       <div className="space-y-3">
         {employees.map((e) => {
           const isOwnerUser = e.role === 'owner';
+          const editing = editingId === e.id;
+          const saving = savingId === e.id;
           return (
-            <div key={e.id} className="kpi-card flex flex-wrap items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  {isOwnerUser ? <Crown size={16} className="text-warning" /> : <Users size={16} className="text-text-muted" />}
-                  <strong className="truncate">{e.full_name}</strong>
-                  <span className={`badge ${isOwnerUser ? 'badge-primary' : 'badge'}`}>{isOwnerUser ? 'propriétaire' : 'employé'}</span>
+            <div key={e.id} className="kpi-card">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    {isOwnerUser ? <Crown size={16} className="text-warning" /> : <Users size={16} className="text-text-muted" />}
+                    <strong className="truncate">{e.full_name}</strong>
+                    <span className={`badge ${isOwnerUser ? 'badge-primary' : 'badge'}`}>
+                      {isOwnerUser ? 'propriétaire' : 'employé'}
+                    </span>
+                    {!e.is_active && <span className="badge badge-danger">désactivé</span>}
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-2 text-sm text-text-muted">
+                    {e.phone && <span>{e.phone}</span>}
+                    {e.can_view_purchase_prices && <span className="badge badge-warning">prix d&rsquo;achat</span>}
+                    {e.can_view_owner_dashboard && <span className="badge badge-primary">dashboard patron</span>}
+                    {!isOwnerUser && !e.can_view_purchase_prices && !e.can_view_owner_dashboard && (
+                      <span>permissions restreintes</span>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-1 flex flex-wrap gap-2 text-sm text-text-muted">
-                  {e.phone && <span>{e.phone}</span>}
-                  {e.can_view_purchase_prices && <span className="badge badge-warning">prix d&rsquo;achat</span>}
-                  {e.can_view_owner_dashboard && <span className="badge badge-primary">dashboard patron</span>}
-                  {!isOwnerUser && !e.can_view_purchase_prices && !e.can_view_owner_dashboard && (
-                    <span>permissions restreintes</span>
-                  )}
-                </div>
+                {!isOwnerUser && (
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn-secondary !px-3 !py-1.5 text-sm"
+                      title="Ventes, shifts et écarts des 30 derniers jours"
+                      onClick={() => void openPdf(`/reports/employee.pdf?user_id=${e.id}`).catch(() => setActionFlash('PDF indisponible (connexion requise).'))}
+                    >
+                      <FileText size={15} /> Rapport
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary !px-3 !py-1.5 text-sm"
+                      onClick={() => setEditingId(editing ? null : e.id)}
+                      disabled={saving}
+                    >
+                      <Settings2 size={15} /> {editing ? 'Fermer' : 'Modifier'}
+                    </button>
+                  </div>
+                )}
               </div>
+
+              {editing && (
+                <div className="mt-3 border-t border-border pt-3">
+                  <p className="field-label mb-2">Permissions</p>
+                  <label className="mb-2 flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={e.can_view_purchase_prices}
+                      onChange={(ev) => {
+                        const next = { ...e, can_view_purchase_prices: ev.target.checked } as EmployeeApi;
+                        setEmployees((prev) => prev.map((x) => (x.id === e.id ? next : x)));
+                      }}
+                    />
+                    Voir les prix d&rsquo;achat
+                  </label>
+                  <label className="mb-3 flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={e.can_view_owner_dashboard}
+                      onChange={(ev) => {
+                        const next = { ...e, can_view_owner_dashboard: ev.target.checked } as EmployeeApi;
+                        setEmployees((prev) => prev.map((x) => (x.id === e.id ? next : x)));
+                      }}
+                    />
+                    Voir le dashboard patron
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn-accent !px-3 !py-1.5 text-sm"
+                      disabled={saving}
+                      onClick={() =>
+                        void savePerm(e, {
+                          can_view_purchase_prices: e.can_view_purchase_prices,
+                          can_view_owner_dashboard: e.can_view_owner_dashboard,
+                        })
+                      }
+                    >
+                      {saving ? 'Enregistrement…' : 'Enregistrer les permissions'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary !px-3 !py-1.5 text-sm text-danger"
+                      disabled={saving || !e.is_active}
+                      onClick={() => void deactivate(e)}
+                    >
+                      <UserX size={15} /> Désactiver le compte
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

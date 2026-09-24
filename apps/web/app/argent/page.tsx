@@ -6,6 +6,7 @@ import { ArrowDownCircle, ArrowUpCircle, Banknote, CheckCircle2, Wallet } from '
 import { useData } from '../../lib/useData';
 import { addMoneyMovement, getMoneyMovementsToday, MoneyKind, MoneyMovementRow } from '../../lib/repo';
 import { formatFcfa, formatTime } from '../../lib/format';
+import { MONEY_CHANNEL_LABELS, MONEY_CHANNELS, MoneyChannel } from '../../lib/config';
 
 const KINDS: { key: MoneyKind; label: string; icon: React.ReactNode; hint: string }[] = [
   { key: 'income', label: 'Entrée', icon: <ArrowUpCircle size={18} />, hint: 'ex. apport personnel, remboursement' },
@@ -13,11 +14,15 @@ const KINDS: { key: MoneyKind; label: string; icon: React.ReactNode; hint: strin
   { key: 'withdrawal', label: 'Retrait', icon: <Wallet size={18} />, hint: 'ex. retrait du patron pour lui-même' },
 ];
 
+const EXPENSE_CATEGORIES = ['Fournisseur', 'Transport', 'Loyer', 'Salaire', 'Électricité / eau', 'Autre'];
+
 export default function ArgentPage() {
   const version = useData();
   const [kind, setKind] = useState<MoneyKind>('expense');
+  const [channel, setChannel] = useState<MoneyChannel>('cash');
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
+  const [category, setCategory] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const [today, setToday] = useState<MoneyMovementRow[]>([]);
@@ -36,11 +41,12 @@ export default function ArgentPage() {
   const submit = async () => {
     if (!valid) return;
     setBusy(true);
-    const row = await addMoneyMovement(kind, n, reason.trim() || null);
+    const row = await addMoneyMovement(kind, n, reason.trim() || null, channel, null, kind === 'expense' ? category : null);
     setBusy(false);
     if (row) {
       setAmount('');
       setReason('');
+      setCategory(null);
       reload();
       const label = KINDS.find((k) => k.key === kind)!.label;
       setFlash(`${label} enregistrée : ${formatFcfa(n)}`);
@@ -55,6 +61,11 @@ export default function ArgentPage() {
     },
     { income: 0, expense: 0, withdrawal: 0 },
   );
+  const netByChannel = {
+    cash: today.filter((r) => r.channel !== 'mobile_money' && r.channel !== 'orange_money').reduce((a, r) => a + r.amount, 0),
+    momo: today.filter((r) => r.channel === 'mobile_money').reduce((a, r) => a + r.amount, 0),
+    orange: today.filter((r) => r.channel === 'orange_money').reduce((a, r) => a + r.amount, 0),
+  };
 
   return (
     <>
@@ -80,6 +91,11 @@ export default function ArgentPage() {
         </div>
       </div>
 
+      <p className="mb-5 text-sm text-text-muted">
+        Net du jour — cash {formatFcfa(netByChannel.cash)} · Mobile Money {formatFcfa(netByChannel.momo)} · Orange
+        Money {formatFcfa(netByChannel.orange)}
+      </p>
+
       {flash && (
         <div className="mb-5 flex items-center gap-2 rounded-field bg-success px-3 py-3 text-sm font-medium text-white">
           <CheckCircle2 size={18} /> {flash}
@@ -101,6 +117,49 @@ export default function ArgentPage() {
             </button>
           ))}
         </div>
+
+        <div className="mb-4 flex flex-wrap items-center gap-4">
+          <div>
+            <p className="field-label">Canal</p>
+            <div className="inline-flex overflow-hidden rounded-field border border-border">
+              {MONEY_CHANNELS.map((ch) => (
+                <button
+                  key={ch}
+                  type="button"
+                  className={`px-3 py-2 text-sm font-semibold ${channel === ch ? 'bg-background text-white' : 'text-text-muted'}`}
+                  onClick={() => setChannel(ch)}
+                >
+                  {MONEY_CHANNEL_LABELS[ch]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="text-sm text-text-muted">
+            {channel === 'cash'
+              ? 'Espèces physiques : entrent dans la caisse.'
+              : `L’argent ne touche pas la caisse physique — il rejoint le compte ${MONEY_CHANNEL_LABELS[channel]}.`}
+          </div>
+        </div>
+
+        {kind === 'expense' && (
+          <div className="mb-4">
+            <p className="field-label">Catégorie</p>
+            <div className="flex flex-wrap gap-2">
+              {EXPENSE_CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                    category === c ? 'border-background bg-background text-white' : 'border-border text-text-muted'
+                  }`}
+                  onClick={() => setCategory(category === c ? null : c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <label className="field-label" htmlFor="amount">Montant (FCFA)</label>
         <input
@@ -138,7 +197,12 @@ export default function ArgentPage() {
               <div key={m.id} className="kpi-card flex items-center justify-between gap-3">
                 <div>
                   <strong className="text-sm">{KINDS.find((k) => k.key === m.type)?.label ?? m.type}</strong>
-                  {m.reason && <p className="text-xs text-text-muted">{m.reason}</p>}
+                  {(m.category || m.reason) && (
+                    <p className="text-xs text-text-muted">
+                      {m.category ? `${m.category}${m.reason ? ' — ' : ''}` : ''}
+                      {m.reason}
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   <div className={`font-heading text-base font-bold ${m.amount >= 0 ? 'text-success' : 'text-danger'}`}>

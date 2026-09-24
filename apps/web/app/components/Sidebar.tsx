@@ -4,13 +4,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {
+  BarChart3,
   Check,
   ClipboardCheck,
   Copy,
+  HandCoins,
   Home,
   Package,
   ScrollText,
+  Settings,
+  ShieldAlert,
   ShoppingCart,
+  Timer,
   Users,
   Wallet,
   type LucideIcon,
@@ -29,15 +34,22 @@ interface NavLink {
 const LINKS: NavLink[] = [
   { href: '/', label: 'Aujourd’hui', icon: Home },
   { href: '/sale', label: 'Vente', icon: ShoppingCart },
+  { href: '/credits', label: 'Clients & crédits', icon: HandCoins },
   { href: '/argent', label: 'Argent', icon: Wallet },
-  { href: '/closing', label: 'Clôture', icon: ClipboardCheck },
   { href: '/stock', label: 'Stock', icon: Package },
+  { href: '/shift', label: 'Mon shift', icon: Timer },
+  { href: '/closing', label: 'Clôture', icon: ClipboardCheck },
 ];
 
+const REPORT_LINK: NavLink = { href: '/rapports', label: 'Rapports', icon: BarChart3 };
+
 const OWNER_LINKS: NavLink[] = [
+  { href: '/anomalies', label: 'Anomalies', icon: ShieldAlert },
   { href: '/equipe', label: 'Équipe', icon: Users },
   { href: '/journal', label: 'Journal', icon: ScrollText },
 ];
+
+const SETTINGS_LINK: NavLink = { href: '/parametres', label: 'Paramètres', icon: Settings };
 
 export default function Sidebar({
   open,
@@ -49,7 +61,14 @@ export default function Sidebar({
   session: Session | null;
 }) {
   const pathname = normalizePathname(usePathname());
-  const links = session?.role === 'owner' ? [...LINKS, ...OWNER_LINKS] : LINKS;
+  const isOwner = session?.role === 'owner';
+  const canReports = isOwner || !!session?.can_view_owner_dashboard;
+  const links = [
+    ...LINKS,
+    ...(canReports ? [REPORT_LINK] : []),
+    ...(isOwner ? OWNER_LINKS : []),
+    SETTINGS_LINK,
+  ];
 
   return (
     <>
@@ -73,7 +92,7 @@ export default function Sidebar({
           title="Réduire le menu"
         >
           <Logo variant="icon" className="h-9 w-9 shrink-0 rounded-lg" />
-          <span className="font-heading text-lg font-extrabold text-white">BizFlow</span>
+          <span className="font-heading text-lg font-extrabold text-white">Korise</span>
         </button>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">

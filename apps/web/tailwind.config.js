@@ -28,8 +28,8 @@ module.exports = {
         block: `${tokens.radius.block}px`,
       },
       fontFamily: {
-        heading: ['var(--font-manrope)', 'sans-serif'],
-        body: ['var(--font-inter)', 'sans-serif'],
+        heading: ['var(--font-signika)', 'sans-serif'],
+        body: ['var(--font-urbanist)', 'sans-serif'],
       },
       spacing: {
         4.5: '18px',

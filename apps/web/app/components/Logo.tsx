@@ -5,20 +5,24 @@ import Image from 'next/image';
 export default function Logo({ variant = 'icon', className }: { variant?: 'full' | 'icon'; className?: string }) {
   if (variant === 'full') {
     return (
-      <Image
-        src="/brand/bizflow-logo-full.png"
-        alt="BizFlow — Votre activité, sous contrôle"
-        width={480}
-        height={320}
-        className={className}
-        priority
-      />
+      <div className="flex flex-col items-center gap-2">
+        <Image
+          src="/brand/korise-logo-full.png?v=2"
+          alt="Korise — Votre activité, sous contrôle"
+          width={480}
+          height={218}
+          className={className}
+          priority
+        />
+        {/* Sous-titre géré en texte (l'image n'en contient pas) — voir opencode.md §A.2. */}
+        <p className="font-body text-sm font-medium tracking-wide text-white/60">Korah Business Manager</p>
+      </div>
     );
   }
   return (
     <Image
-      src="/brand/bizflow-icon.png"
-      alt="BizFlow"
+      src="/brand/korise-icon.png?v=2"
+      alt="Korise"
       width={40}
       height={40}
       className={className}

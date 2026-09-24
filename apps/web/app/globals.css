@@ -6,13 +6,13 @@
   html,
   body {
     @apply bg-[#F7F7F8] text-text;
-    font-family: var(--font-inter), sans-serif;
+    font-family: var(--font-urbanist), sans-serif;
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-manrope), sans-serif;
+    font-family: var(--font-signika), sans-serif;
     font-weight: 800;
   }
 }

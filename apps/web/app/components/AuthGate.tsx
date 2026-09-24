@@ -23,8 +23,8 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       }
     };
     check();
-    window.addEventListener('bizflow-session-changed', check);
-    return () => window.removeEventListener('bizflow-session-changed', check);
+    window.addEventListener('korise-session-changed', check);
+    return () => window.removeEventListener('korise-session-changed', check);
   }, [pathname, router]);
 
   if (!ready && pathname !== '/login') return null;

@@ -7,6 +7,7 @@ import { getSession, Session } from '../../lib/session';
 import { normalizePathname } from '../../lib/pathname';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import IdleLock from './IdleLock';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = normalizePathname(usePathname());
@@ -20,14 +21,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const sync = () => setSession(getSession());
     sync();
-    window.addEventListener('bizflow-session-changed', sync);
-    return () => window.removeEventListener('bizflow-session-changed', sync);
+    window.addEventListener('korise-session-changed', sync);
+    return () => window.removeEventListener('korise-session-changed', sync);
   }, []);
 
   if (pathname === '/login') return <>{children}</>;
 
   return (
     <>
+      <IdleLock />
       <Sidebar open={open} onClose={() => setOpen(false)} session={session} />
       <div className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
         <TopBar onOpenMenu={() => setOpen(true)} session={session} />

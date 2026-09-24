@@ -20,9 +20,27 @@ type Form =
   | { mode: 'move'; kind: MoveKind; product: ProductRow }
   | { mode: 'create'; draft: ProductDraft }
   | { mode: 'edit'; draft: ProductDraft };
-type ProductDraft = { id: string | null; name: string; purchase_price: string; selling_price: string; minimum_stock: string };
+type ProductDraft = {
+  id: string | null;
+  name: string;
+  purchase_price: string;
+  selling_price: string;
+  minimum_stock: string;
+  barcode: string;
+  category: string;
+  is_stockable: boolean;
+};
 
-const emptyDraft = (): ProductDraft => ({ id: null, name: '', purchase_price: '', selling_price: '', minimum_stock: '' });
+const emptyDraft = (): ProductDraft => ({
+  id: null,
+  name: '',
+  purchase_price: '',
+  selling_price: '',
+  minimum_stock: '',
+  barcode: '',
+  category: '',
+  is_stockable: true,
+});
 
 export default function StockPage() {
   const version = useData();
@@ -38,7 +56,7 @@ export default function StockPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version]);
 
-  const low = products.filter((p) => p.quantity <= p.minimum_stock && p.is_active);
+  const low = products.filter((p) => p.is_stockable !== false && p.quantity <= p.minimum_stock && p.is_active);
 
   const submitMove = async (product: ProductRow, kind: MoveKind, delta: number, reason: string | null) => {
     const row: StockMovementRow | null = await addStockMovement(product.id, kind, kind === 'restock' ? delta : -delta, reason);
@@ -57,6 +75,9 @@ export default function StockPage() {
         purchase_price: Number(draft.purchase_price) || 0,
         selling_price: Number(draft.selling_price) || 0,
         minimum_stock: Number(draft.minimum_stock) || 0,
+        barcode: draft.barcode.trim() || null,
+        category: draft.category.trim() || null,
+        is_stockable: draft.is_stockable,
       });
     } else {
       await createProduct({
@@ -65,6 +86,9 @@ export default function StockPage() {
         purchase_price: Number(draft.purchase_price) || 0,
         selling_price: Number(draft.selling_price) || 0,
         minimum_stock: Number(draft.minimum_stock) || 0,
+        barcode: draft.barcode.trim() || null,
+        category: draft.category.trim() || null,
+        is_stockable: draft.is_stockable,
       });
     }
     setForm(null);
@@ -113,7 +137,7 @@ export default function StockPage() {
 
       <div className="space-y-3">
         {products.map((p) => {
-          const isLow = p.quantity <= p.minimum_stock && p.is_active;
+          const isLow = p.is_stockable !== false && p.quantity <= p.minimum_stock && p.is_active;
           return (
             <div key={p.id} className="kpi-card flex flex-wrap items-center gap-3">
               <div className="min-w-0 flex-1">
@@ -121,11 +145,14 @@ export default function StockPage() {
                   <strong className="truncate">{p.name}</strong>
                   {isLow && <span className="badge badge-danger">stock bas</span>}
                   {!p.is_active && <span className="badge">inactif</span>}
+                  {p.is_stockable === false && <span className="badge">service</span>}
+                  {p.category && <span className="badge badge-primary">{p.category}</span>}
                 </div>
                 <div className="mt-1 flex flex-wrap gap-3 text-sm text-text-muted">
                   <span>stock <strong className="text-text">{p.quantity}</strong></span>
                   <span>seuil {p.minimum_stock}</span>
                   <span>vente {formatFcfa(p.selling_price)}</span>
+                  {p.barcode && <span>code {p.barcode}</span>}
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -156,6 +183,9 @@ export default function StockPage() {
                           purchase_price: String(p.purchase_price ?? 0),
                           selling_price: String(p.selling_price),
                           minimum_stock: String(p.minimum_stock),
+                          barcode: p.barcode ?? '',
+                          category: p.category ?? '',
+                          is_stockable: p.is_stockable !== false,
                         },
                       })
                     }
@@ -293,6 +323,20 @@ function ProductForm({
           <input id="pthresh" className="field-input" inputMode="numeric" value={d.minimum_stock} onChange={set('minimum_stock')} placeholder="0" />
         </div>
       </div>
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <div>
+          <label className="field-label" htmlFor="pbarcode">Code-barres</label>
+          <input id="pbarcode" className="field-input" value={d.barcode} onChange={set('barcode')} placeholder="scanner ou saisir" />
+        </div>
+        <div>
+          <label className="field-label" htmlFor="pcat">Catégorie</label>
+          <input id="pcat" className="field-input" value={d.category} onChange={set('category')} placeholder="ex. Boissons" />
+        </div>
+      </div>
+      <label className="mt-3 flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={d.is_stockable} onChange={(e) => setD((prev) => ({ ...prev, is_stockable: e.target.checked }))} />
+        Produit stockable (décoché = service : la vente ne touche jamais au stock)
+      </label>
       <div className="mt-4 flex gap-2">
         <button type="button" className="btn-accent flex-1" disabled={busy || !d.name.trim()} onClick={() => { setBusy(true); void onSubmit(d).finally(() => setBusy(false)); }}>
           {isEdit ? 'Enregistrer' : 'Créer le produit'}

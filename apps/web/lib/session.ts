@@ -7,13 +7,14 @@ export interface Session {
   user_id: string;
   business_id: string;
   business_code: string;
+  business_name: string;
   role: 'owner' | 'employee';
   full_name: string;
   can_view_purchase_prices: boolean;
   can_view_owner_dashboard: boolean;
 }
 
-const KEY = 'bizflow_session';
+const KEY = 'korise_session';
 
 let cached: Session | null | undefined;
 
@@ -36,11 +37,11 @@ export function getSession(): Session | null {
 export function setSession(session: Session): void {
   cached = session;
   window.localStorage.setItem(KEY, JSON.stringify(session));
-  window.dispatchEvent(new Event('bizflow-session-changed'));
+  window.dispatchEvent(new Event('korise-session-changed'));
 }
 
 export function clearSession(): void {
   cached = null;
   window.localStorage.removeItem(KEY);
-  window.dispatchEvent(new Event('bizflow-session-changed'));
+  window.dispatchEvent(new Event('korise-session-changed'));
 }

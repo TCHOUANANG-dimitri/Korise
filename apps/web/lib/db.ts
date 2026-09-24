@@ -2,7 +2,7 @@
 // SQLite du mobile pour garder une logique partagée simple à lire.
 
 const DB_NAME = 'korah-web';
-const DB_VERSION = 1;
+const DB_VERSION = 3;
 
 export const STORES = [
   'products',
@@ -11,6 +11,8 @@ export const STORES = [
   'money_movements',
   'stock_movements',
   'daily_closings',
+  'customers',
+  'shifts',
   'outbox',
   'kv',
 ] as const;

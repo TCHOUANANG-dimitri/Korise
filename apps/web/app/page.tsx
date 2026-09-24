@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Banknote, PackageSearch, ReceiptText, TrendingUp, Users } from 'lucide-react';
+import Link from 'next/link';
+import { AlertTriangle, Banknote, HandCoins, PackageSearch, PiggyBank, ReceiptText, ShieldAlert, TrendingUp, Users } from 'lucide-react';
 
 import { useData } from '../lib/useData';
 import {
@@ -19,8 +20,10 @@ import {
   ProductRow,
   SaleRow,
 } from '../lib/repo';
-import { fetchDashboard, DashboardApi } from '../lib/api';
+import { fetchAnomalies, fetchDashboard, fetchReportSummary, DashboardApi, ReportSummaryApi } from '../lib/api';
+import { getSession } from '../lib/session';
 import { formatDate, formatFcfa, todayKey } from '../lib/format';
+import { isTauri } from '../lib/platform';
 
 interface LocalFallback {
   products: ProductRow[];
@@ -79,6 +82,12 @@ export default function HomePage() {
     return <p className="text-sm text-text-muted">Chargement…</p>;
   }
 
+  const salesToday = remote ? remote.sales_total : local!.sales.reduce((a, s) => a + s.total_amount, 0);
+  const expectedCash = remote ? remote.expected_cash : local!.expectedCash;
+  const stockAlertCount = remote
+    ? remote.stock_alerts.length
+    : local!.products.filter((p) => p.quantity <= p.minimum_stock).length;
+
   return (
     <>
       <div className="mb-6">
@@ -92,6 +101,29 @@ export default function HomePage() {
           </p>
         )}
       </div>
+
+      {isTauri() && (
+        // Bandeau "aperçu rapide" desktop uniquement (poste toujours allumé en
+        // arrière-boutique, voir opencode.md §4.2). Ne remplace rien : le
+        // dashboard complet reste en dessous, identique au web classique.
+        <div className="mb-5 kpi-card">
+          <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-text-muted">Aperçu rapide</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div>
+              <span className="kpi-label">Ventes du jour</span>
+              <div className="kpi-value">{formatFcfa(salesToday)}</div>
+            </div>
+            <div>
+              <span className="kpi-label">Caisse attendue</span>
+              <div className="kpi-value">{formatFcfa(expectedCash)}</div>
+            </div>
+            <div>
+              <span className="kpi-label">Alertes stock</span>
+              <div className={`kpi-value ${stockAlertCount > 0 ? 'text-danger' : 'text-success'}`}>{stockAlertCount}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KpiCard
@@ -120,6 +152,8 @@ export default function HomePage() {
           sub={rejected.length > 0 ? `${rejected.length} refusé(s)` : undefined}
         />
       </div>
+
+      {remote && <ControlCards />}
 
       <ClosingCard remote={remote} local={local} />
 
@@ -169,6 +203,53 @@ export default function HomePage() {
         </Section>
       )}
     </>
+  );
+}
+
+// Couche « Contrôle » du dashboard propriétaire : dettes clients, bénéfice estimé, anomalies à traiter.
+function ControlCards() {
+  const isOwner = getSession()?.role === 'owner';
+  const [summary, setSummary] = useState<ReportSummaryApi | null>(null);
+  const [anomalies, setAnomalies] = useState<number | null>(null);
+
+  useEffect(() => {
+    const day = todayKey();
+    fetchReportSummary({ date_from: day, date_to: day })
+      .then(setSummary)
+      .catch(() => undefined);
+    if (isOwner) {
+      fetchAnomalies({ days: 14, only_open: true })
+        .then((a) => setAnomalies(a.length))
+        .catch(() => undefined);
+    }
+  }, [isOwner]);
+
+  if (!summary && anomalies === null) return null;
+  return (
+    <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {summary && (
+        <KpiCard
+          icon={<HandCoins size={18} />}
+          label="Dettes clients"
+          value={formatFcfa(summary.credit_outstanding)}
+          tone={summary.credit_outstanding > 0 ? 'danger' : undefined}
+        />
+      )}
+      {summary && summary.estimated_profit !== null && (
+        <KpiCard icon={<PiggyBank size={18} />} label="Bénéfice estimé du jour" value={formatFcfa(summary.estimated_profit)} />
+      )}
+      {anomalies !== null && (
+        <Link href="/anomalies" className="block">
+          <KpiCard
+            icon={<ShieldAlert size={18} />}
+            label="Anomalies à traiter"
+            value={String(anomalies)}
+            tone={anomalies > 0 ? 'danger' : undefined}
+            sub={anomalies > 0 ? 'Voir le centre d’anomalies' : undefined}
+          />
+        </Link>
+      )}
+    </div>
   );
 }
 

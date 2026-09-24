@@ -17,6 +17,25 @@ export function formatTime(iso: string): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${formatDate(iso)} à ${formatTime(iso)}`;
+}
+
+export function paymentLabel(method: string): string {
+  if (method === 'credit') return 'Crédit';
+  if (method === 'mobile_money') return 'Mobile Money';
+  if (method === 'orange_money') return 'Orange Money';
+  return 'Cash';
+}
+
+export function channelLabel(channel: string | null | undefined): string {
+  if (channel === 'mobile_money') return 'Mobile Money';
+  if (channel === 'orange_money') return 'Orange Money';
+  return 'Cash';
+}
+
 export function todayKey(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
