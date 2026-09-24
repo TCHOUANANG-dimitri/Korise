@@ -203,6 +203,98 @@
         }
       }
     },
+    "/auth/recover-code": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Recover Code Route",
+        "description": "Code entreprise oublié — sans authentification (c'est tout l'objet).\nVérification d'identité légère : le code seul ne permet aucune action sans le PIN.",
+        "operationId": "recover_code_route_auth_recover_code_post",
+        "parameters": [
+          {
+            "name": "x-device-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "name": "x-platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Platform"
+            }
+          },
+          {
+            "name": "x-app-version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-App-Version"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoverCodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoverCodeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/employees": {
       "get": {
         "tags": [
@@ -283,7 +375,7 @@
           "auth"
         ],
         "summary": "Update Employee Route",
-        "description": "Modifier un employ\u00e9. Le r\u00f4le est immuable \u2014 un employ\u00e9 ne peut jamais\ndevenir owner via cette route, et aucun employ\u00e9 ne peut se modifier lui-m\u00eame.",
+        "description": "Modifier un employé. Le rôle est immuable — un employé ne peut jamais\ndevenir owner via cette route, et aucun employé ne peut se modifier lui-même.",
         "operationId": "update_employee_route_auth_employees__user_id__patch",
         "security": [
           {
@@ -560,7 +652,7 @@
           "customers"
         ],
         "summary": "List All",
-        "description": "Liste des clients et leur solde d\u00fb \u2014 calcul\u00e9 \u00e0 la vol\u00e9e depuis les\n\u00e9v\u00e9nements (ventes \u00e0 cr\u00e9dit \u2212 remboursements), jamais stock\u00e9.",
+        "description": "Liste des clients et leur solde dû — calculé à la volée depuis les\névénements (ventes à crédit − remboursements), jamais stocké.",
         "operationId": "list_all_customers_get",
         "responses": {
           "200": {
@@ -589,7 +681,7 @@
           "customers"
         ],
         "summary": "Create",
-        "description": "Cr\u00e9er un client cr\u00e9dit (sur place, pour une vente \u00e0 cr\u00e9dit imm\u00e9diate).",
+        "description": "Créer un client crédit (sur place, pour une vente à crédit immédiate).",
         "operationId": "create_customers_post",
         "requestBody": {
           "content": {
@@ -636,7 +728,7 @@
           "customers"
         ],
         "summary": "Get One",
-        "description": "Fiche client : solde d\u00fb + historique (ventes \u00e0 cr\u00e9dit et remboursements).",
+        "description": "Fiche client : solde dû + historique (ventes à crédit et remboursements).",
         "operationId": "get_one_customers__customer_id__get",
         "security": [
           {
@@ -781,7 +873,7 @@
           "audit"
         ],
         "summary": "List Audit",
-        "description": "Journal d'audit (MVP #6). R\u00e9serv\u00e9 au propri\u00e9taire \u2014 tout est trac\u00e9, rien n'est \u00e9dit\u00e9.",
+        "description": "Journal d'audit (MVP #6). Réservé au propriétaire — tout est tracé, rien n'est édité.",
         "operationId": "list_audit_audit_log_get",
         "security": [
           {
@@ -1556,7 +1648,7 @@
           "admin"
         ],
         "summary": "Change Subscription",
-        "description": "View/change plan, extend a trial, suspend/reactivate the subscription (cahier \u00a715).",
+        "description": "View/change plan, extend a trial, suspend/reactivate the subscription (cahier §15).",
         "operationId": "change_subscription_admin_businesses__business_id__subscription_post",
         "security": [
           {
@@ -3855,7 +3947,7 @@
           "status"
         ],
         "title": "AnomalyOut",
-        "description": "One derived anomaly shown in the web /anomalies screen.\n\n`amount` is a signed FCFA gap (closing) or a negative quantity delta (stock)\nor a price deviation \u2014 the exact meaning depends on `kind`."
+        "description": "One derived anomaly shown in the web /anomalies screen.\n\n`amount` is a signed FCFA gap (closing) or a negative quantity delta (stock)\nor a price deviation — the exact meaning depends on `kind`."
       },
       "AnomalyResolveIn": {
         "properties": {
@@ -3942,7 +4034,7 @@
           "user_full_name"
         ],
         "title": "AuditLogOut",
-        "description": "Une ligne du journal : qui a fait quoi, quand \u2014 et sur quel objet."
+        "description": "Une ligne du journal : qui a fait quoi, quand — et sur quel objet."
       },
       "BillingOut": {
         "properties": {
@@ -4340,7 +4432,7 @@
           "last_activity_at"
         ],
         "title": "BusinessHealthStatus",
-        "description": "\u00ab healthy \u00bb / \u00ab a_surveiller \u00bb / \u00ab a_risque \u00bb \u2014 computed from configurable, measurable\nrules (days without activity, blocked sync, failed payment), never an arbitrary score.\n`reasons` says which rule fired so the team can act (cahier Super Admin \u00a78)."
+        "description": "« healthy » / « a_surveiller » / « a_risque » — computed from configurable, measurable\nrules (days without activity, blocked sync, failed payment), never an arbitrary score.\n`reasons` says which rule fired so the team can act (cahier Super Admin §8)."
       },
       "BusinessListItemOut": {
         "properties": {
@@ -5012,7 +5104,7 @@
           "actual_orange"
         ],
         "title": "DailyClosingIn",
-        "description": "No `expected_cash`/`expected_momo` here on purpose: they are computed\nserver-side from recorded money movements, never trusted from the client \u2014\nsee documentation/SYNC_DESIGN.md."
+        "description": "No `expected_cash`/`expected_momo` here on purpose: they are computed\nserver-side from recorded money movements, never trusted from the client —\nsee documentation/SYNC_DESIGN.md."
       },
       "DashboardOut": {
         "properties": {
@@ -6057,7 +6149,7 @@
           "is_active"
         ],
         "title": "ProductOut",
-        "description": "Full view \u2014 owners, or employees with can_view_purchase_prices."
+        "description": "Full view — owners, or employees with can_view_purchase_prices."
       },
       "ProductOutRestricted": {
         "properties": {
@@ -6442,6 +6534,48 @@
         ],
         "title": "PushResult"
       },
+      "RecoverCodeRequest": {
+        "properties": {
+          "business_name": {
+            "type": "string",
+            "title": "Business Name"
+          },
+          "owner_full_name": {
+            "type": "string",
+            "title": "Owner Full Name"
+          },
+          "owner_phone": {
+            "type": "string",
+            "title": "Owner Phone"
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_name",
+          "owner_full_name",
+          "owner_phone"
+        ],
+        "title": "RecoverCodeRequest",
+        "description": "Récupération du code entreprise, sans être connecté (nouvel appareil, code perdu).\nLe code seul ne permet aucune action — la connexion exige toujours le PIN — donc une\nvérification d'identité légère suffit : nom de l'entreprise + nom du propriétaire +\ntéléphone du propriétaire, tous les trois obligatoires."
+      },
+      "RecoverCodeResponse": {
+        "properties": {
+          "business_code": {
+            "type": "string",
+            "title": "Business Code"
+          },
+          "business_name": {
+            "type": "string",
+            "title": "Business Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_code",
+          "business_name"
+        ],
+        "title": "RecoverCodeResponse"
+      },
       "RegisterBusinessRequest": {
         "properties": {
           "business_name": {
@@ -6545,7 +6679,7 @@
           "label"
         ],
         "title": "RelatedOperationOut",
-        "description": "One operation that contributed to an anomaly (drill-down \"historique d'un \u00e9cart\")."
+        "description": "One operation that contributed to an anomaly (drill-down \"historique d'un écart\")."
       },
       "RetentionOut": {
         "properties": {
@@ -7327,7 +7461,7 @@
         },
         "type": "object",
         "title": "UpdateEmployeeRequest",
-        "description": "\u00c9dition/d\u00e9sactivation d'un employ\u00e9. Pas de `role` (immuable \u2014 voir\nauth_service.update_employee) et pas de `pin` (le PIN employ\u00e9 est cr\u00e9\u00e9 une\nfois \u00e0 sa cr\u00e9ation, on ne le r\u00e9\u00e9dite pas dans le MVP)."
+        "description": "Édition/désactivation d'un employé. Pas de `role` (immuable — voir\nauth_service.update_employee) et pas de `pin` (le PIN employé est créé une\nfois à sa création, on ne le réédite pas dans le MVP)."
       },
       "UserOut": {
         "properties": {

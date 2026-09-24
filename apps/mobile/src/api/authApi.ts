@@ -31,6 +31,21 @@ export function login(business_code: string, pin: string): Promise<TokenResponse
   return apiFetch<TokenResponse>('/auth/login', { method: 'POST', body: { business_code, pin }, auth: false });
 }
 
+// Code entreprise oublié — sans authentification (c'est tout l'objet). Le code seul ne
+// permet aucune action : la connexion exige toujours le PIN.
+export interface RecoverCodeResult {
+  business_code: string;
+  business_name: string;
+}
+
+export function recoverBusinessCode(request: {
+  business_name: string;
+  owner_full_name: string;
+  owner_phone: string;
+}): Promise<RecoverCodeResult> {
+  return apiFetch<RecoverCodeResult>('/auth/recover-code', { method: 'POST', body: request, auth: false });
+}
+
 export function registerBusiness(request: {
   business_name: string;
   sector?: string | null;

@@ -14,6 +14,8 @@ from app.services.platform_service import record_event, upsert_device
 from app.schemas.auth import (
     CreateEmployeeRequest,
     LoginRequest,
+    RecoverCodeRequest,
+    RecoverCodeResponse,
     RegisterBusinessRequest,
     TokenResponse,
     UpdateEmployeeRequest,
@@ -97,6 +99,65 @@ def register_business(session: Session, request: RegisterBusinessRequest, client
     session.refresh(owner)
     session.refresh(business)
     return _token_for(owner, business)
+
+
+def recover_business_code(session: Session, request: RecoverCodeRequest, client=None) -> RecoverCodeResponse:
+    """Renvoie le code entreprise après vérification d'identité légère (nom entreprise +
+    nom + téléphone du propriétaire). Sans authentification par construction — le demandeur
+    a perdu sa session ET son code — mais le code seul ne permet aucune action : la
+    connexion exige toujours le PIN, et les données restent scellées par business_id.
+
+    Message d'erreur volontairement identique succès/échec d'identité (pas d'énumération
+    d'entreprises). Journalisé dans l'audit et la télémétrie : une demande réussie depuis
+    un appareil inconnu est exactement le signal qu'un propriétaire doit pouvoir voir."""
+    # Le nom d'entreprise n'est PAS unique (deux boutiques peuvent porter le même nom) :
+    # on examine tous les candidats et on retient celui dont le propriétaire correspond
+    # exactement (nom complet + téléphone). Jamais `.first()` sur le seul nom.
+    owner = None
+    business = None
+    candidates = session.exec(
+        select(Business).where(Business.name == request.business_name.strip())
+    ).all()
+    for candidate in candidates:
+        owner = session.exec(
+            select(User).where(
+                User.business_id == candidate.id,
+                User.role == UserRole.owner,
+                User.is_active == True,  # noqa: E712
+                User.full_name == request.owner_full_name.strip(),
+                User.phone == request.owner_phone.strip(),
+            )
+        ).first()
+        if owner is not None:
+            business = candidate
+            break
+
+    if business is None or owner is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            "Aucune entreprise ne correspond à ces informations. Vérifie le nom exact, ton nom complet et ton numéro de téléphone.",
+        )
+
+    session.add(
+        AuditLog(
+            business_id=business.id,
+            user_id=owner.id,
+            action="business.code_recovered",
+            entity_type="business",
+            entity_id=business.id,
+        )
+    )
+    record_event(
+        session,
+        "business.code_recovered",
+        business_id=business.id,
+        user_id=owner.id,
+        device_key=getattr(client, "device_key", None),
+        platform=getattr(client, "platform", None),
+        app_version=getattr(client, "app_version", None),
+    )
+    session.commit()
+    return RecoverCodeResponse(business_code=business.business_code, business_name=business.name)
 
 
 def login(session: Session, request: LoginRequest, client=None) -> TokenResponse:

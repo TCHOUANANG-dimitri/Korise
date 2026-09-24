@@ -25,7 +25,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('korise-session-changed', sync);
   }, []);
 
-  if (pathname === '/login') return <>{children}</>;
+  // Routes publiques (hors shell) : connexion et récupération du code entreprise.
+  if (pathname === '/login' || pathname === '/code-oublie') return <>{children}</>;
 
   return (
     <>

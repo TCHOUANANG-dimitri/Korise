@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Check, Copy, LogIn, Store } from 'lucide-react';
+import { ArrowRight, Check, Copy, HelpCircle, LogIn, Store } from 'lucide-react';
 
 import { ApiError, login, registerBusiness } from '../../lib/api';
 import { Session, setSession } from '../../lib/session';
@@ -137,6 +138,13 @@ export default function LoginPage() {
                 <LogIn size={18} />
                 Se connecter
               </button>
+              <Link
+                href="/code-oublie"
+                className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-text-muted transition hover:text-text"
+              >
+                <HelpCircle size={14} />
+                Code entreprise oublié ?
+              </Link>
             </form>
           ) : (
             <form
@@ -219,7 +227,8 @@ function BusinessCreatedCard({ session, onContinue }: { session: Session; onCont
       <h1 className="font-heading text-lg font-extrabold text-background">Entreprise créée</h1>
       <p className="mt-1 text-sm text-text-muted">
         Note bien ce code : c&rsquo;est lui qui permet à tes employés (et à toi, sur un autre appareil) de se
-        connecter à ton entreprise. Il n&rsquo;est réaffiché nulle part ailleurs que dans le menu latéral.
+        connecter à ton entreprise. En cas d&rsquo;oubli, il est récupérable depuis la page de connexion
+        (« Code entreprise oublié ? »).
       </p>
 
       <button

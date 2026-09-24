@@ -31,6 +31,22 @@ class TokenResponse(BaseModel):
     can_view_owner_dashboard: bool
 
 
+class RecoverCodeRequest(BaseModel):
+    """Récupération du code entreprise, sans être connecté (nouvel appareil, code perdu).
+    Le code seul ne permet aucune action — la connexion exige toujours le PIN — donc une
+    vérification d'identité légère suffit : nom de l'entreprise + nom du propriétaire +
+    téléphone du propriétaire, tous les trois obligatoires."""
+
+    business_name: str
+    owner_full_name: str
+    owner_phone: str
+
+
+class RecoverCodeResponse(BaseModel):
+    business_code: str
+    business_name: str
+
+
 class CreateEmployeeRequest(BaseModel):
     full_name: str
     phone: str | None = None

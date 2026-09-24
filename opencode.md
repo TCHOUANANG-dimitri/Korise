@@ -8,6 +8,14 @@ session : il est mis à jour entre deux sessions.
 Le fondateur a explicitement demandé à Claude Code de **terminer lui-même** le chantier (mobile compris) et de
 compiler l'APK. Ce que tu trouveras en reprenant, **déjà fait et vérifié** (ne le refais pas) :
 
+* **Récupération du code entreprise (2026-09-24, ajout après ton build)** : nouvel endpoint backend
+  `POST /auth/recover-code` (sans auth — c'est tout l'objet) dans `backend/app/api/auth.py` +
+  `auth_service.recover_business_code`, testé dans `backend/tests/test_recover_code.py` (5 verts).
+  Côté mobile : `recoverBusinessCode()` dans `src/api/authApi.ts` + mode `'recover'` dans
+  `AuthScreen.tsx` (bouton « Code entreprise oublié ? » sur la carte de connexion). Parité web :
+  page `/code-oublie`. Contrat régénéré dans `packages/shared/openapi.json`. Le message d'erreur
+  est identique succès/échec d'identité (pas d'énumération d'entreprises) — ne le rends pas plus
+  verbeux.
 * **Bug Gradle §A.3 résolu — cause racine trouvée.** Le fichier `apps/mobile/android/local.properties` doit
   être au format *properties Java* : les antislash y sont des caractères d'échappement. Un `sdk.dir` avec des
   antislash **simples** devient `C:UsersAdmin...` (chemin invalide → « La syntaxe du nom de fichier… »).

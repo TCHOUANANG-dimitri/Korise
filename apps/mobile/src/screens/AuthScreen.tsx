@@ -11,8 +11,9 @@ import { useApp } from '../context/AppContext';
 import { PIN_MAX, PIN_MIN } from '../config';
 import { palette, RADIUS, SPACING, typo } from '../theme';
 import { Button, Card, Field } from '../components/ui';
+import { recoverBusinessCode, RecoverCodeResult } from '../api/authApi';
 
-type Mode = 'login' | 'register' | 'registered';
+type Mode = 'login' | 'register' | 'registered' | 'recover';
 
 export function AuthScreen() {
   const { login, register, enterAfterRegister, apiBaseUrl } = useApp();
@@ -31,6 +32,9 @@ export function AuthScreen() {
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [createdCode, setCreatedCode] = useState('');
+
+  // recover (code entreprise oublié — parité web)
+  const [recovered, setRecovered] = useState<RecoverCodeResult | null>(null);
 
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -68,6 +72,20 @@ export function AuthScreen() {
       setMode('registered');
     });
 
+  const doRecover = () =>
+    run(async () => {
+      if (!businessName.trim()) throw new Error('Saisis le nom de ton entreprise.');
+      if (!ownerName.trim()) throw new Error('Saisis ton nom complet (propriétaire).');
+      if (!ownerPhone.trim()) throw new Error('Saisis le numéro de téléphone du compte.');
+      setRecovered(
+        await recoverBusinessCode({
+          business_name: businessName.trim(),
+          owner_full_name: ownerName.trim(),
+          owner_phone: ownerPhone.trim(),
+        }),
+      );
+    });
+
   return (
     <KeyboardAvoidingView
       style={styles.root}
@@ -87,6 +105,48 @@ export function AuthScreen() {
             <Text style={typo.muted}>Note bien ce code : c’est lui qui permet à tes employés (et à toi, sur un autre appareil) de se connecter à ton entreprise. Il est réaffiché dans le menu et sur l’écran Équipe.</Text>
             <Text selectable style={[typo.kpi, { fontSize: 40, letterSpacing: 2, marginVertical: SPACING.md }]}>{createdCode}</Text>
             <Button title="J’ai noté mon code — continuer" variant="accent" onPress={() => void run(enterAfterRegister)} disabled={busy} />
+          </Card>
+        ) : mode === 'recover' ? (
+          <Card style={{ marginTop: SPACING.lg }}>
+            <View style={styles.cardTitle}>
+              <KeyRound size={18} color={palette.primary} />
+              <Text style={typo.microLabel}>Code entreprise oublié ?</Text>
+            </View>
+            <Text style={[typo.muted, { marginBottom: SPACING.md }]}>
+              Les trois informations doivent correspondre exactement à celles saisies à la création de l’entreprise. Ton code PIN, lui, n’est
+              jamais demandé ici.
+            </Text>
+            {recovered ? (
+              <>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.sm }}>
+                  <CheckCircle2 size={22} color={palette.success} />
+                  <Text style={typo.heading}>Code retrouvé</Text>
+                </View>
+                <Text style={typo.muted}>
+                  Entreprise {recovered.business_name} — note bien ce code : c’est celui de ta connexion, avec ton PIN.
+                </Text>
+                <Text selectable style={[typo.kpi, { fontSize: 40, letterSpacing: 2, marginVertical: SPACING.md }]}>
+                  {recovered.business_code}
+                </Text>
+                <Button title="Me connecter maintenant" variant="accent" onPress={() => { setError(null); setMode('login'); }} disabled={busy} />
+              </>
+            ) : (
+              <>
+                <Field label="Nom de l’entreprise" placeholder="ex. Boutique Awa" value={businessName} onChangeText={setBusinessName} />
+                <Field label="Ton nom (propriétaire)" placeholder="ex. Awa Ngo" value={ownerName} onChangeText={setOwnerName} />
+                <Field
+                  label="Numéro de téléphone du compte"
+                  placeholder="ex. 6 90 00 00 00"
+                  keyboardType="phone-pad"
+                  value={ownerPhone}
+                  onChangeText={setOwnerPhone}
+                />
+                {error ? <ErrorLine message={error} /> : null}
+                <Button title="Retrouver mon code" variant="accent" onPress={() => void doRecover()} disabled={busy} />
+                <View style={{ height: SPACING.md }} />
+                <Button title="Retour à la connexion" variant="secondary" onPress={() => { setError(null); setRecovered(null); setMode('login'); }} disabled={busy} />
+              </>
+            )}
           </Card>
         ) : mode === 'login' ? (
           <Card style={{ marginTop: SPACING.lg }}>
@@ -115,6 +175,17 @@ export function AuthScreen() {
             <Button title="Se connecter" variant="accent" onPress={() => void doLogin()} disabled={busy} />
             <View style={{ height: SPACING.md }} />
             <Button title="Créer mon entreprise" variant="secondary" onPress={() => { setError(null); setMode('register'); }} disabled={busy} />
+            <View style={{ height: SPACING.sm }} />
+            <Button
+              title="Code entreprise oublié ?"
+              variant="secondary"
+              onPress={() => {
+                setError(null);
+                setRecovered(null);
+                setMode('recover');
+              }}
+              disabled={busy}
+            />
           </Card>
         ) : (
           <Card style={{ marginTop: SPACING.lg }}>

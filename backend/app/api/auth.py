@@ -8,6 +8,8 @@ from app.db.session import get_session
 from app.schemas.auth import (
     CreateEmployeeRequest,
     LoginRequest,
+    RecoverCodeRequest,
+    RecoverCodeResponse,
     RegisterBusinessRequest,
     TokenResponse,
     UpdateEmployeeRequest,
@@ -17,6 +19,7 @@ from app.services.auth_service import (
     create_employee,
     list_users,
     login,
+    recover_business_code,
     register_business,
     update_employee,
 )
@@ -40,6 +43,17 @@ def login_route(
     client: ClientInfo = Depends(get_client_info),
 ):
     return login(session, request, client)
+
+
+@router.post("/recover-code", response_model=RecoverCodeResponse)
+def recover_code_route(
+    request: RecoverCodeRequest,
+    session: Session = Depends(get_session),
+    client: ClientInfo = Depends(get_client_info),
+):
+    """Code entreprise oublié — sans authentification (c'est tout l'objet).
+    Vérification d'identité légère : le code seul ne permet aucune action sans le PIN."""
+    return recover_business_code(session, request, client)
 
 
 @router.post("/employees", response_model=UserOut)

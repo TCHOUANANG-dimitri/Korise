@@ -119,6 +119,16 @@ différente, mais ne pas re-débattre sans raison nouvelle.
   `KRH4X2`) + le compte propriétaire (PIN), renvoie un JWT.
 - `POST /auth/login` : `{ business_code, pin }` → JWT. Fonctionne pour propriétaire et employés
   (même mécanisme, différencié par `role` dans le token).
+- `POST /auth/recover-code` (2026-09-24, sans authentification — c'est tout l'objet) : code
+  entreprise oublié. Vérification légère nom entreprise + nom complet + téléphone du propriétaire
+  (tous requis, correspondance exacte) ; message d'erreur volontairement identique succès/échec
+  d'identité (pas d'énumération d'entreprises) ; demande journalisée (audit
+  `business.code_recovered` + télémétrie). Le nom d'entreprise n'étant pas unique, le service
+  examine tous les homonymes et retient celui dont le propriétaire correspond. **Ne pas durcir**
+  (SMS/e-mail) sans validation du fondateur — le code seul ne permet aucune action, la connexion
+  exige toujours le PIN. UI : page web `/code-oublie` (lien depuis `/login`, route publique dans
+  AuthGate + AppShell) et mode `'recover'` de `AuthScreen` côté mobile. Tests :
+  `backend/tests/test_recover_code.py` (5 verts).
 - `POST /auth/employees` : réservé au propriétaire (`require_owner`), crée un employé avec son PIN
   et ses permissions (`can_view_purchase_prices`, `can_view_owner_dashboard`).
 - `/sync/push` et `/sync/pull` exigent maintenant un token Bearer valide ; `business_id`/`user_id`

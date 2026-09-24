@@ -145,6 +145,21 @@ export async function login(input: { business_code: string; pin: string }): Prom
   return request<Session>('/auth/login', { method: 'POST', body: JSON.stringify(input) }, false);
 }
 
+// Code entreprise oublié — sans authentification (c'est tout l'objet). Le code seul ne
+// permet aucune action : la connexion exige toujours le PIN.
+export interface RecoverCodeResult {
+  business_code: string;
+  business_name: string;
+}
+
+export async function recoverBusinessCode(input: {
+  business_name: string;
+  owner_full_name: string;
+  owner_phone: string;
+}): Promise<RecoverCodeResult> {
+  return request<RecoverCodeResult>('/auth/recover-code', { method: 'POST', body: JSON.stringify(input) }, false);
+}
+
 // ===== Sync =====
 
 export async function push(body: PushBody): Promise<PushResponse> {

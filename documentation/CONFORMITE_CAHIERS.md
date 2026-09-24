@@ -54,6 +54,7 @@ Légende : ✅ fait et testé · 🟡 fait avec une limite assumée (précisée)
 | Point | État |
 |---|---|
 | Comptes individuels + PIN | ✅ |
+| Récupération du code entreprise (hors cahier, ajout 2026-09-24) | ✅ `POST /auth/recover-code` + écran dédié web (`/code-oublie`) et mobile — vérification nom entreprise + nom + téléphone du propriétaire, message d'erreur identique succès/échec (pas d'énumération), demande journalisée (audit + télémétrie). Le code seul ne permet aucune action : la connexion exige toujours le PIN. |
 | Verrouillage automatique après inactivité | ✅ web et mobile, durée réglable (défaut 10 min) — PIN vérifié hors-ligne via empreinte salée, jamais stocké en clair |
 | Changement d'employé rapide | 🟡 verrou → « Changer d'utilisateur » (déconnexion + nouvelle saisie). L'écran « Qui utilisez-vous ? » à cartes de profils (§4.1) n'est pas fait : le fondateur l'a écarté pour le MVP (« pas besoin de tout ça »). |
 | Désactivation immédiate d'un utilisateur | ✅ |
