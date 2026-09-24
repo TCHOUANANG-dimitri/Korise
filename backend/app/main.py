@@ -29,6 +29,9 @@ app = FastAPI(title=settings.app_name)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_allow_origins,
+    # Toute app web déployée sur Vercel (web, admin, prévisualisations) : l'auth passe par un jeton Bearer,
+    # jamais par cookie, donc autoriser ces origines n'expose pas de session.
+    allow_origin_regex=settings.cors_allow_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

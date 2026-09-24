@@ -24,6 +24,8 @@ class Settings(BaseSettings):
         "https://biz-flow-theta.vercel.app",
     ]
 
+    cors_allow_origin_regex: str | None = r"https://[a-z0-9-]+\.vercel\.app"
+
     # Règles de santé d'usage du Super Admin (cahier Super Admin §8 : « règles configurables »,
     # jamais une note arbitraire). Modifiables via variables d'environnement.
     health_watch_after_days: int = 7
