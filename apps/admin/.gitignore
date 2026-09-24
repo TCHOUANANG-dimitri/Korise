@@ -1,0 +1,20 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next
+/out
+next-env.d.ts
+
+# debug
+npm-debug.*
+yarn-debug.*
+
+# local env files
+.env*.local
+
+# generated from packages/shared/brand — do not edit or commit, see scripts/sync-brand.mjs
+/public/brand
+
+# typescript incremental build info
+*.tsbuildinfo

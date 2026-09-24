@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-[#F7F7F8] text-text;
+    font-family: var(--font-urbanist), sans-serif;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-signika), sans-serif;
+    font-weight: 800;
+  }
+}
+
+@layer components {
+  /* Interface orientée données : tableaux + cartes KPI compactes, pas les composants de
+     saisie de apps/web (voir opencode.md chantier D.4). */
+  .kpi-card {
+    @apply rounded-card border border-border bg-surface p-4;
+  }
+  .kpi-label {
+    @apply text-xs font-medium uppercase tracking-wide text-text-muted;
+  }
+  .kpi-value {
+    @apply mt-1 font-heading text-2xl font-bold;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-field bg-background px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-field bg-accent px-4 py-3 text-sm font-semibold text-background transition hover:opacity-90 disabled:opacity-40;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-field border border-border bg-surface px-4 py-3 text-sm font-semibold text-text transition hover:bg-[#F3F4F6] disabled:opacity-40;
+  }
+
+  .field-label {
+    @apply mb-1 block text-xs font-medium uppercase tracking-wide text-text-muted;
+  }
+  .field-input {
+    @apply block w-full rounded-field border border-border bg-surface px-3 py-2.5 text-sm text-text outline-none focus:border-focus focus:ring-1 focus:ring-focus;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+  .badge-healthy {
+    @apply bg-success/10 text-success;
+  }
+  .badge-watch {
+    @apply bg-warning/10 text-[#8A7600];
+  }
+  .badge-risk {
+    @apply bg-danger/10 text-danger;
+  }
+
+  .badge-info {
+    @apply bg-focus/10 text-focus;
+  }
+  .badge-neutral {
+    @apply bg-[#F3F4F6] text-text-muted;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-field bg-danger px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40;
+  }
+
+  table.data-table {
+    @apply w-full text-sm;
+  }
+  table.data-table thead {
+    @apply bg-[#FAFAFA] text-text-muted;
+  }
+  table.data-table th {
+    @apply px-3 py-2 text-left font-semibold;
+  }
+  table.data-table td {
+    @apply px-3 py-2;
+  }
+  table.data-table tbody tr {
+    @apply border-t border-border;
+  }
+}
