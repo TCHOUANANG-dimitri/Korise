@@ -1,15 +1,16 @@
-# BizFlow (ex-Korah Business Manager)
+# Korise (Korah Business Manager)
 
 Système de contrôle quotidien pour petites entreprises physiques (Cameroun) : caisse, ventes et
 stock capturés via des événements métier uniques, avec réconciliation de fin de journée.
 
 ## Documents clés
 
-- [`documentation/MVP_SPEC.md`](documentation/MVP_SPEC.md) — spécification produit du MVP (source de vérité).
+- [`documentation/CAHIER_DES_CHARGES.md`](documentation/CAHIER_DES_CHARGES.md) — cahier des charges à jour (source de vérité produit).
+- [`documentation/MVP_SPEC.md`](documentation/MVP_SPEC.md) — spécification produit du MVP (historique).
 - [`documentation/SYNC_DESIGN.md`](documentation/SYNC_DESIGN.md) — protocole de synchronisation multi-appareils.
-- [`documentation/DESIGN_SYSTEM.md`](documentation/DESIGN_SYSTEM.md) — design system BizFlow (couleurs, typo, composants, icônes).
+- [`documentation/DESIGN_SYSTEM.md`](documentation/DESIGN_SYSTEM.md) — design system Korise (couleurs, typo, composants, icônes).
 - [`documentation/Korah Business Manager Problem Solution ICP MVP.pdf`](<documentation/Korah Business Manager Problem Solution ICP MVP.pdf>) — document produit original.
-- [`documentation/BizFlow_Identite_Visuelle_Design_System.pdf`](documentation/BizFlow_Identite_Visuelle_Design_System.pdf) — design system original (fondateur).
+- [`documentation/BizFlow_Identite_Visuelle_Design_System.pdf`](documentation/BizFlow_Identite_Visuelle_Design_System.pdf) — design system original BizFlow (fondateur, historique).
 - [`CLAUDE.md`](CLAUDE.md) — instructions de travail pour l'agent Claude Code (backend + web + desktop).
 - [`opencode.md`](opencode.md) — instructions de travail pour l'agent OpenCode (mobile).
 
@@ -20,6 +21,7 @@ backend/            API (Python/FastAPI/PostgreSQL) — Claude Code
 apps/web/            App web (Next.js) — Claude Code
 apps/desktop/         Enveloppe desktop (Tauri + export statique de apps/web) — Claude Code
 apps/mobile/         App mobile (React Native) — OpenCode
+apps/admin/          Plateforme Super Admin (Next.js, déploiement séparé) — Claude Code
 packages/shared/     Contrat API (OpenAPI), tokens design, assets de marque
 documentation/       Specs produit et design
 ```

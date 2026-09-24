@@ -1,4 +1,4 @@
-# BizFlow — Design System (référence d'implémentation)
+# Korise — Design System (référence d'implémentation)
 
 > Digitalisation du document `BizFlow_Identite_Visuelle_Design_System.pdf` fourni par le fondateur,
 > avec les décisions d'implémentation nécessaires pour que le web (Claude Code) et le mobile
@@ -13,7 +13,7 @@ retenue (voir §5). Un emoji dans un commit sera considéré comme un défaut à
 
 ## 0. Marque
 
-- Nom : **BizFlow**. Tagline principale : *« Votre activité, sous contrôle »*.
+- Nom : **Korise**. Tagline principale : *« Votre activité, sous contrôle »*.
 - Taglines secondaires (usages ponctuels, écrans vides, onboarding) : *« Enregistrer · Suivre ·
   Décider »* / *« Plus de visibilité. Moins de pertes. »*
 - Promesse produit : voir ce qui s'est passé, comprendre les écarts, agir vite.
@@ -26,9 +26,9 @@ retenue (voir §5). Un emoji dans un commit sera considéré comme un défaut à
 Fichiers sources dans `packages/shared/brand/` (les deux agents utilisent ces fichiers, jamais une
 resauvegarde personnelle du PNG du dossier `documentation/`) :
 
-- `bizflow-logo-full.png` — lockup complet (icône + mot BizFlow + tagline), fond noir. Pour écrans de
+- `korise-logo-full.png` — lockup complet (icône + mot Korise + tagline), fond noir. Pour écrans de
   connexion, splash screen, à-propos.
-- `bizflow-icon.png` — icône seule (le "B" doré dans son carré arrondi), recadrée carrée. Pour
+- `korise-icon.png` — icône seule, recadrée carrée. Pour
   favicon, icône d'app, petits formats, barre de navigation.
 
 Règles d'usage (reprises du PDF, ne pas y déroger) :

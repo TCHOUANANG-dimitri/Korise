@@ -26,17 +26,25 @@ le fondateur.
 - **Agent OpenCode** : `apps/mobile/` (React Native) uniquement — priorité à la saisie rapide
   employé. Instructions détaillées dans `opencode.md`.
 
-**Règle stricte** : je ne modifie jamais de fichiers sous `apps/mobile/`. Si un changement de contrat
-API est nécessaire pour le mobile, je le documente dans `packages/shared/` et je mets à jour
-`opencode.md`, je ne touche pas directement au code mobile.
+**Règle par défaut** : je ne modifie pas `apps/mobile/` pendant qu'OpenCode y travaille. Si un changement
+de contrat API est nécessaire pour le mobile, je le documente dans `packages/shared/` et je mets à jour
+`opencode.md`. **Exception (2026-09-24)** : le fondateur m'a explicitement demandé de terminer moi-même le
+chantier « parité mobile/web » et de compiler l'APK — j'ai donc modifié `apps/mobile/` pour ce chantier
+(voir `opencode.md`, section de tête). Cette exception ne vaut que pour ce chantier.
+
+**Périmètre ajouté** : `apps/admin/` (Super Admin, Next.js séparé, port 3001) est aussi le mien. Matrice de
+conformité aux deux cahiers des charges : `documentation/CONFORMITE_CAHIERS.md`. Desktop (`apps/desktop`)
+mis de côté sur instruction du fondateur.
 
 ## Design system — implémentation web/desktop
 
 Référence contraignante : `documentation/DESIGN_SYSTEM.md` (digitalisation du design system
-BizFlow fourni par le fondateur) + `packages/shared/design-tokens.json` (tokens machine-readable —
-**importer ce fichier, ne jamais retranscrire un hex à la main**) + `packages/shared/brand/`
-(logo : `bizflow-logo-full.png` pour connexion/splash, `bizflow-icon.png` pour favicon/petits
-formats). **Zéro emoji dans l'UI, nulle part** — uniquement des icônes Lucide (voir plus bas).
+BizFlow fourni par le fondateur, palette/typo ensuite reprises telles quelles par Koness puis
+Korise — seul le nom du produit a changé) + `packages/shared/design-tokens.json` (tokens
+machine-readable — **importer ce fichier, ne jamais retranscrire un hex à la main**) +
+`packages/shared/brand/` (logo : `korise-logo-full.png` pour connexion/splash, `korise-icon.png`
+pour favicon/petits formats — noms mis à jour lors du rebrand Koness → Korise, 2026-09-23).
+**Zéro emoji dans l'UI, nulle part** — uniquement des icônes Lucide (voir plus bas).
 
 Décisions d'implémentation pour Next.js :
 - **Tailwind CSS**, avec le thème étendu directement depuis `packages/shared/design-tokens.json`

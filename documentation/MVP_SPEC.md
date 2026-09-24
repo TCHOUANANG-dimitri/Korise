@@ -3,9 +3,9 @@
 > Synthèse de travail à partir de `documentation/Korah Business Manager Problem Solution ICP MVP.pdf`.
 > Ce document est la **source de vérité produit** pour le MVP. Toute décision de scope doit s'y référer.
 >
-> Le produit porte désormais le nom de marque **BizFlow** (identité visuelle définie dans
-> `documentation/DESIGN_SYSTEM.md`) — le contenu produit ci-dessous reste inchangé, seul le nom
-> commercial s'ajoute.
+> Le produit porte désormais le nom de marque **Korise** (identité visuelle définie dans
+> `documentation/DESIGN_SYSTEM.md`, renommée BizFlow → Koness → Korise) — le contenu produit
+> ci-dessous reste inchangé, seul le nom commercial s'ajoute.
 
 ## 1. Le problème (essence)
 

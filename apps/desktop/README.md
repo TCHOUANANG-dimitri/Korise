@@ -21,11 +21,11 @@ npm run build          # build web export + binaire desktop (installer)
 
 ## Icons
 
-Générées depuis l'icône officielle BizFlow (`packages/shared/brand/bizflow-icon.png`)
-via `npx tauri icon ../../packages/shared/brand/bizflow-icon.png`. Si le logo change,
+Générées depuis l'icône officielle Korise (`packages/shared/brand/korise-icon.png`)
+via `npx tauri icon ../../packages/shared/brand/korise-icon.png`. Si le logo change,
 relancer cette commande — ne jamais éditer les PNG dans `src-tauri/icons/` à la main.
 
 ## Titre de fenêtre / identifiant
 
-Nom de produit `BizFlow`, identifiant `com.korah.bizflow`, définis dans
+Nom de produit `Korise`, identifiant `com.korah.korise`, définis dans
 `src-tauri/tauri.conf.json`.
