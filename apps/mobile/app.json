@@ -1,34 +1,41 @@
 {
   "expo": {
-    "name": "BizFlow",
-    "slug": "bizflow",
-    "version": "0.1.0",
+    "name": "Korise",
+    "slug": "korise",
+    "version": "0.2.0",
     "orientation": "portrait",
-    "icon": "./assets/brand/bizflow-icon.png",
+    "icon": "./assets/brand/korise-icon.png",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#0B0B0D",
+    "backgroundColor": "#000000",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "package": "com.korah.bizflow",
       "adaptiveIcon": {
-        "backgroundColor": "#0B0B0D",
-        "foregroundImage": "./assets/brand/bizflow-icon.png"
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/brand/korise-icon.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/brand/bizflow-icon.png"
+      "favicon": "./assets/brand/korise-icon.png"
     },
     "plugins": [
       "expo-font",
       "expo-secure-store",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Korise utilise la caméra pour scanner les codes-barres des produits.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0B0B0D",
-          "image": "./assets/brand/bizflow-icon.png",
+          "backgroundColor": "#000000",
+          "image": "./assets/brand/korise-icon-white.png",
           "imageWidth": 160,
           "resizeMode": "contain"
         }
@@ -38,13 +45,17 @@
         "expo-build-properties",
         {
           "android": {
-            "buildArchs": ["armeabi-v7a", "arm64-v8a"],
+            "buildArchs": [
+              "armeabi-v7a",
+              "arm64-v8a"
+            ],
             "useLegacyPackaging": true,
             "enableMinifyInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "expo-sharing"
     ]
   }
 }

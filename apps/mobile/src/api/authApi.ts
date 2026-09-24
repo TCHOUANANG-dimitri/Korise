@@ -9,6 +9,7 @@ export interface TokenResponse {
   user_id: string;
   business_id: string;
   business_code: string;
+  business_name: string;
   role: Role;
   full_name: string;
   can_view_purchase_prices: boolean;

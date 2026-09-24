@@ -7,6 +7,8 @@ import { apiFetch } from './client';
 export interface ExpectedCashOut {
   closing_date: string;
   expected_cash: number;
+  expected_momo: number;
+  expected_orange: number;
   sales_total: number;
   income_total: number;
   expense_total: number;

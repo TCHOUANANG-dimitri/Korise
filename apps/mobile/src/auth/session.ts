@@ -4,7 +4,7 @@
 
 import * as SecureStore from 'expo-secure-store';
 
-const SESSION_KEY = 'bizflow.session';
+const SESSION_KEY = 'korise.session';
 
 export type Role = 'owner' | 'employee';
 
@@ -13,6 +13,7 @@ export interface Session {
   user_id: string;
   business_id: string;
   business_code: string;
+  business_name: string;
   role: Role;
   full_name: string;
   can_view_purchase_prices: boolean;
@@ -45,9 +46,10 @@ export async function loadSession(): Promise<Session | null> {
     if (!raw) return null;
     const session = JSON.parse(raw) as Session;
     // Anciennes sessions (persistées avant que TokenResponse ne porte les
-    // permissions) : on les rétablit par défaut comme propriétaire.
+    // permissions ni le business_name) : on rétablit des défauts sûrs.
     session.can_view_purchase_prices = session.can_view_purchase_prices ?? session.role === 'owner';
     session.can_view_owner_dashboard = session.can_view_owner_dashboard ?? session.role === 'owner';
+    session.business_name = session.business_name ?? '';
     cachedToken = session.access_token;
     cachedSession = session;
     return session;

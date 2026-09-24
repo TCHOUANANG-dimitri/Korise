@@ -74,7 +74,7 @@ export function AuthScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Image source={require('../../assets/brand/bizflow-logo-full.png')} style={styles.logo} resizeMode="contain" />
+        <Image source={require('../../assets/brand/korise-logo-full.png')} style={styles.logo} resizeMode="contain" />
         <Text style={[typo.heading, styles.tagline, { color: palette.surface }]}>Votre activité, sous contrôle</Text>
         <Text style={[typo.muted, styles.taglineSub]}>Enregistrer · Suivre · Décider</Text>
 

@@ -4,6 +4,7 @@
 
 import { API_BASE_URL } from '../config';
 import { getToken } from '../auth/session';
+import { clientHeaders } from './telemetryApi';
 
 const TIMEOUT_MS = 15_000;
 
@@ -20,7 +21,7 @@ export async function apiFetch<T>(
   init: { method?: string; body?: unknown; auth?: boolean } = {},
 ): Promise<T> {
   const { method = 'GET', body, auth = true } = init;
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { ...clientHeaders() };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (auth) {
     const token = getToken();

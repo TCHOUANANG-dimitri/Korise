@@ -11,6 +11,9 @@ export interface ProductOut {
   selling_price: number;
   minimum_stock: number;
   is_active: boolean;
+  barcode?: string | null;
+  category?: string | null;
+  is_stockable?: boolean;
 }
 
 export function listProducts(): Promise<ProductOut[]> {
@@ -23,6 +26,9 @@ export function createProduct(request: {
   purchase_price?: number;
   selling_price?: number;
   minimum_stock?: number;
+  barcode?: string | null;
+  category?: string | null;
+  is_stockable?: boolean;
 }): Promise<ProductOut> {
   return apiFetch<ProductOut>('/products', { method: 'POST', body: request });
 }
@@ -35,6 +41,9 @@ export function updateProduct(
     selling_price?: number;
     minimum_stock?: number;
     is_active?: boolean;
+    barcode?: string | null;
+    category?: string | null;
+    is_stockable?: boolean;
   },
 ): Promise<ProductOut> {
   return apiFetch<ProductOut>(`/products/${productId}`, { method: 'PATCH', body: patch });

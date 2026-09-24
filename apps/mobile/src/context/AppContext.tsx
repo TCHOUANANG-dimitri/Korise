@@ -13,6 +13,7 @@ import { SYNC_INTERVAL_MS } from '../config';
 import { Session, persistSession, loadSession, setSessionCache, clearSession as clearStored } from '../auth/session';
 import { login as apiLogin, registerBusiness as apiRegister } from '../api/authApi';
 import { initDatabase } from '../db/database';
+import { rememberPin } from '../lock';
 import { saveCurrentUser } from '../db/repo';
 import { syncEngine, SyncState } from '../sync/syncEngine';
 
@@ -58,6 +59,7 @@ interface TokenResponseLikeWithUser {
   user_id: string;
   business_id: string;
   business_code: string;
+  business_name: string;
   role: Session['role'];
   full_name: string;
   can_view_purchase_prices: boolean;
@@ -70,6 +72,7 @@ function buildSession(token: TokenResponseLikeWithUser): Session {
     user_id: String(token.user_id),
     business_id: String(token.business_id),
     business_code: token.business_code,
+    business_name: token.business_name,
     role: token.role,
     full_name: token.full_name,
     can_view_purchase_prices: token.can_view_purchase_prices,
@@ -97,6 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [syncState, setSyncState] = useState<SyncState>({ phase: 'idle' });
   const [pending, setPending] = useState<Session | null>(null);
+  const pendingPin = useRef<string>('');
   const appState = useRef<AppStateStatus>(AppState.currentState);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
@@ -173,6 +177,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const token = await apiLogin(businessCode.trim(), pin.trim());
     const s = buildSession(token);
     await adoptSession(s);
+    await rememberPin(s.user_id, pin.trim());
     setSession(s);
     setStatus('loggedIn');
     void syncEngine.syncNow();
@@ -189,6 +194,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     pin: string;
   }): Promise<RegisteredBusiness> => {
     const token = await apiRegister(request);
+    pendingPin.current = request.pin;
     setPending(buildSession(token));
     return {
       access_token: token.access_token,
@@ -200,6 +206,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const enterAfterRegister = useCallback(async () => {
     if (!pending) return;
     await adoptSession(pending);
+    if (pendingPin.current) await rememberPin(pending.user_id, pendingPin.current);
+    pendingPin.current = '';
     setSession(pending);
     setPending(null);
     setStatus('loggedIn');

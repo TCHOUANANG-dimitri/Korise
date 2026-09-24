@@ -14,12 +14,30 @@ import { palette, RADIUS, SPACING, typo } from '../theme';
 import { Badge, Button, Card, Field, Stepper } from '../components/ui';
 import { EmptyText, KpiCard, Notice, ScreenHeader } from '../components/shared';
 
-type ProductDraft = { id: string | null; name: string; purchase_price: string; selling_price: string; minimum_stock: string };
+type ProductDraft = {
+  id: string | null;
+  name: string;
+  purchase_price: string;
+  selling_price: string;
+  minimum_stock: string;
+  barcode: string;
+  category: string;
+  is_stockable: boolean;
+};
 type Form =
   | { mode: 'move'; kind: StockKind; product: ProductRow }
   | { mode: 'product'; draft: ProductDraft };
 
-const emptyDraft = (): ProductDraft => ({ id: null, name: '', purchase_price: '', selling_price: '', minimum_stock: '' });
+const emptyDraft = (): ProductDraft => ({
+  id: null,
+  name: '',
+  purchase_price: '',
+  selling_price: '',
+  minimum_stock: '',
+  barcode: '',
+  category: '',
+  is_stockable: true,
+});
 
 // Même écran « Stock » que le web : KPI, alerte de seuil, liste avec actions
 // Entrée / Ajuster (tous) et Modifier / Nouveau produit (propriétaire).
@@ -36,7 +54,7 @@ export function StockScreen() {
     setFeed(getStockMovementFeed(30));
   }, [refreshKey]);
 
-  const low = products.filter((p) => p.quantity <= p.minimum_stock);
+  const low = products.filter((p) => p.is_stockable !== 0 && p.quantity <= p.minimum_stock);
 
   const showFlash = (text: string) => {
     setFlash(text);
@@ -59,6 +77,9 @@ export function StockScreen() {
         purchase_price: Number(draft.purchase_price) || 0,
         selling_price: Number(draft.selling_price) || 0,
         minimum_stock: Number(draft.minimum_stock) || 0,
+        barcode: draft.barcode.trim() || null,
+        category: draft.category.trim() || null,
+        is_stockable: draft.is_stockable,
       });
     } else {
       await createProduct({
@@ -67,6 +88,9 @@ export function StockScreen() {
         purchase_price: Number(draft.purchase_price) || 0,
         selling_price: Number(draft.selling_price) || 0,
         minimum_stock: Number(draft.minimum_stock) || 0,
+        barcode: draft.barcode.trim() || null,
+        category: draft.category.trim() || null,
+        is_stockable: draft.is_stockable,
       });
     }
     setForm(null);
@@ -119,7 +143,7 @@ export function StockScreen() {
         <EmptyText label={isOwner ? 'Aucun produit — ajoute ton premier produit ci-dessous.' : 'Aucun produit connu pour l’instant.'} />
       ) : (
         products.map((p) => {
-          const isLow = p.quantity <= p.minimum_stock;
+          const isLow = p.is_stockable !== 0 && p.quantity <= p.minimum_stock;
           return (
             <Card key={p.id} style={{ marginBottom: SPACING.sm }}>
               <View style={styles.nameRow}>
@@ -144,6 +168,9 @@ export function StockScreen() {
                           purchase_price: String(p.purchase_price ?? 0),
                           selling_price: String(p.selling_price),
                           minimum_stock: String(p.minimum_stock),
+                          barcode: p.barcode ?? '',
+                          category: p.category ?? '',
+                          is_stockable: p.is_stockable !== 0,
                         },
                       })
                     }
@@ -293,6 +320,14 @@ function ProductForm({
         <Field label="Prix achat" keyboardType="number-pad" placeholder="0" value={d.purchase_price} onChangeText={num('purchase_price')} />
         <Field label="Prix vente" keyboardType="number-pad" placeholder="0" value={d.selling_price} onChangeText={num('selling_price')} />
         <Field label="Seuil" keyboardType="number-pad" placeholder="0" value={d.minimum_stock} onChangeText={num('minimum_stock')} />
+        <Field label="Code-barres" placeholder="saisir ou coller le code" value={d.barcode} onChangeText={set('barcode')} />
+        <Field label="Catégorie" placeholder="ex. Boissons" value={d.category} onChangeText={set('category')} />
+        <Pressable onPress={() => setD((prev) => ({ ...prev, is_stockable: !prev.is_stockable }))} style={{ marginBottom: SPACING.md }}>
+          <Text style={[typo.body, { fontWeight: '600' }]}>
+            {d.is_stockable ? '[x]' : '[ ]'} Produit stockable
+          </Text>
+          <Text style={typo.muted}>Décoché = service : la vente ne touche jamais au stock.</Text>
+        </Pressable>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button
           title={isEdit ? 'Enregistrer' : 'Créer le produit'}

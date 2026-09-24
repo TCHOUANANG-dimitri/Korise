@@ -1,6 +1,6 @@
 # apps/mobile
 
-Application mobile **BizFlow** (Korah Business Manager) — périmètre unique de l'agent OpenCode
+Application mobile **Korise** (Korah Business Manager) — périmètre unique de l'agent OpenCode
 (`../../opencode.md`). Priorité : **saisie rapide employé**, ultra légère, offline-first.
 Stack : Expo SDK 57 (React Native) + TypeScript, SQLite (`expo-sqlite`).
 
@@ -8,6 +8,7 @@ Stack : Expo SDK 57 (React Native) + TypeScript, SQLite (`expo-sqlite`).
 
 - **Vendre** (MVP #1, priorité) : catalogue → quantité → moyen de paiement → encaissement.
 - **Argent** (MVP #2) : entrée / dépense / retrait, avec motif et journal du jour.
+- **Stock** (MVP #3) : inventaire et ajustements.
 - **Stock** (MVP #3) : réappro (entrée) et ajustement (perte/casse) ; alertes de seuil.
 - **Jour** (MVP #6/#7 en secondaire) : caisse calculée, ventes du jour, synchronisation,
   dernières ventes/clôtures ; **propriétaire** : caisse attendue (calcul serveur), clôture

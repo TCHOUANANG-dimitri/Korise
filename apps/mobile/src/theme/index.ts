@@ -3,15 +3,17 @@ import { TextStyle } from 'react-native';
 import { palette, RADIUS, SPACING } from './tokens';
 
 // Noms exacts exportés par @expo-google-fonts (chargés via useFonts dans App).
+// Signika ne propose pas de graisse 800 sur Google Fonts — 700 est le maximum,
+// utilisé pour les titres ET les KPI (cahier des charges §7.3).
 export const FONT = {
-  heading: 'Manrope_800ExtraBold',
-  kpi: 'Manrope_700Bold',
-  body: 'Inter_400Regular',
-  microLabel: 'Inter_500Medium',
+  heading: 'Signika_700Bold',
+  kpi: 'Signika_700Bold',
+  body: 'Urbanist_400Regular',
+  microLabel: 'Urbanist_500Medium',
 } as const;
 
-// Typographie DESIGN_SYSTEM §3 : titres Manrope 800, KPI Manrope 700,
-// corps Inter 400, micro-labels Inter 500 majuscules avec letter-spacing.
+// Typographie DESIGN_SYSTEM §3 : titres/KPI Signika 700, corps Urbanist 400,
+// micro-labels Urbanist 500 majuscules avec letter-spacing.
 export const typo: Record<'title' | 'heading' | 'kpi' | 'body' | 'muted' | 'microLabel', TextStyle> = {
   title: { fontFamily: FONT.heading, fontSize: 24, color: palette.text },
   heading: { fontFamily: FONT.heading, fontSize: 18, color: palette.text },
