@@ -1,20 +1,20 @@
 {
   "brand": {
-    "name": "BizFlow",
+    "name": "Korise",
     "tagline": "Votre activité, sous contrôle",
     "taglinesSecondary": ["Enregistrer · Suivre · Décider", "Plus de visibilité. Moins de pertes."]
   },
   "color": {
-    "background": "#0B0B0D",
+    "background": "#000000",
     "surface": "#FFFFFF",
     "text": "#1F2937",
     "textMuted": "#6B7280",
-    "accent": "#D4A017",
-    "accentLight": "#F5C95A",
-    "primary": "#1737A6",
+    "accent": "#F85602",
+    "accentLight": "#FEBFA0",
+    "primary": "#000000",
     "focus": "#2563EB",
     "success": "#16A34A",
-    "warning": "#D97706",
+    "warning": "#FDF770",
     "danger": "#DC2626",
     "border": "#E4E7EC"
   },
@@ -25,10 +25,10 @@
   },
   "spacing": [4, 8, 12, 16, 24, 32],
   "font": {
-    "heading": { "family": "Manrope", "weight": 800 },
-    "body": { "family": "Inter", "weight": 400 },
-    "kpi": { "family": "Manrope", "weight": 700 },
-    "microLabel": { "family": "Inter", "weight": 500, "letterSpacing": "0.04em", "case": "uppercase" }
+    "heading": { "family": "Signika", "weight": 700 },
+    "body": { "family": "Urbanist", "weight": 400 },
+    "kpi": { "family": "Signika", "weight": 700 },
+    "microLabel": { "family": "Urbanist", "weight": 500, "letterSpacing": "0.04em", "case": "uppercase" }
   },
   "icon": {
     "library": "lucide",

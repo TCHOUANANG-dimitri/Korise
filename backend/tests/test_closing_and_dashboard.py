@@ -49,7 +49,13 @@ def test_expected_cash_matches_sales_minus_expenses(client):
                 }
             ],
             "money_movements": [
-                {"client_uuid": str(uuid.uuid4()), "type": "expense", "amount": -300, "reason": "sachets"}
+                {
+                    "client_uuid": str(uuid.uuid4()),
+                    "type": "expense",
+                    "channel": "cash",
+                    "amount": -300,
+                    "reason": "sachets",
+                }
             ],
         },
         headers=_auth_header(business["access_token"]),
@@ -64,6 +70,7 @@ def test_expected_cash_matches_sales_minus_expenses(client):
     assert data["sales_total"] == 1000
     assert data["expense_total"] == -300
     assert data["expected_cash"] == 700
+    assert data["expected_momo"] == 0
 
 
 def test_daily_closing_uses_server_computed_expected_cash_not_client_value(client):
@@ -91,7 +98,7 @@ def test_daily_closing_uses_server_computed_expected_cash_not_client_value(clien
         "/sync/push",
         json={
             "daily_closings": [
-                {"client_uuid": str(uuid.uuid4()), "closing_date": today, "actual_cash": 900}
+                {"client_uuid": str(uuid.uuid4()), "closing_date": today, "actual_cash": 900, "actual_momo": 0, "actual_orange": 0}
             ]
         },
         headers=_auth_header(business["access_token"]),
@@ -103,6 +110,9 @@ def test_daily_closing_uses_server_computed_expected_cash_not_client_value(clien
     assert closing["expected_cash"] == 1000
     assert closing["actual_cash"] == 900
     assert closing["difference"] == -100
+    assert closing["expected_momo"] == 0
+    assert closing["actual_momo"] == 0
+    assert closing["difference_momo"] == 0
 
 
 def test_dashboard_shows_totals_alerts_and_top_products(client):

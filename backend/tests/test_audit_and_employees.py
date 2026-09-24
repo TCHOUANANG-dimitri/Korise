@@ -131,9 +131,9 @@ def test_sync_push_actions_are_audited(client):
         "/sync/push",
         json={
             "sales": [{"client_uuid": str(uuid.uuid4()), "product_id": p["id"], "quantity": 2, "unit_price": 1200, "payment_method": "cash"}],
-            "money_movements": [{"client_uuid": str(uuid.uuid4()), "type": "expense", "amount": -1000}],
+            "money_movements": [{"client_uuid": str(uuid.uuid4()), "type": "expense", "channel": "cash", "amount": -1000}],
             "stock_movements": [{"client_uuid": str(uuid.uuid4()), "product_id": p["id"], "type": "restock", "quantity_delta": 5}],
-            "daily_closings": [{"client_uuid": str(uuid.uuid4()), "closing_date": "2026-09-18", "actual_cash": 5000}],
+            "daily_closings": [{"client_uuid": str(uuid.uuid4()), "closing_date": "2026-09-18", "actual_cash": 5000, "actual_momo": 0, "actual_orange": 0}],
         },
         headers=_auth_header(business["access_token"]),
     )

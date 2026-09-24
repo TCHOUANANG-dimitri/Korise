@@ -17,6 +17,7 @@ def _stock_alerts(session: Session, business_id: uuid.UUID) -> list[dict]:
         select(Product)
         .where(Product.business_id == business_id)
         .where(Product.is_active == True)  # noqa: E712
+        .where(Product.is_stockable == True)  # noqa: E712
         .where(Product.quantity <= Product.minimum_stock)
     ).all()
     return [

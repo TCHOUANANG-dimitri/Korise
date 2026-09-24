@@ -24,6 +24,7 @@ def pull(
     since_money_movements: str | None = None,
     since_stock_movements: str | None = None,
     since_daily_closings: str | None = None,
+    since_customers: str | None = None,
     current_user: CurrentUser = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
@@ -34,4 +35,5 @@ def pull(
         since_money_movements,
         since_stock_movements,
         since_daily_closings,
+        since_customers,
     )

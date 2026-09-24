@@ -5,12 +5,20 @@ from enum import Enum
 from sqlmodel import Field, SQLModel
 
 
+class MoneyMovementChannel(str, Enum):
+    cash = "cash"
+    mobile_money = "mobile_money"
+    orange_money = "orange_money"
+
+
 class MoneyMovementType(str, Enum):
     sale = "sale"
     """Cash produced by a sale — created automatically, never entered manually."""
     income = "income"
     expense = "expense"
     withdrawal = "withdrawal"
+    credit_repayment = "credit_repayment"
+    """A credit repayment — money back in the till, linked to a Customer."""
 
 
 class StockMovementType(str, Enum):
@@ -29,11 +37,14 @@ class Sale(SQLModel, table=True):
     business_id: uuid.UUID = Field(foreign_key="business.id", index=True)
     user_id: uuid.UUID = Field(foreign_key="user.id")
     product_id: uuid.UUID = Field(foreign_key="product.id")
+    customer_id: uuid.UUID | None = Field(default=None, foreign_key="customer.id")
+    """Set when the sale is on credit (payment_method == "credit") or when the
+    sale is linked to a known credit customer."""
     quantity: int
     unit_price: int
     total_amount: int
     payment_method: str
-    """Free text for the MVP: e.g. "cash", "mobile_money"."""
+    """One of "cash", "mobile_money", "credit" for the MVP."""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -45,10 +56,16 @@ class MoneyMovement(SQLModel, table=True):
     business_id: uuid.UUID = Field(foreign_key="business.id", index=True)
     user_id: uuid.UUID = Field(foreign_key="user.id")
     type: MoneyMovementType
+    channel: MoneyMovementChannel | None = None
+    """cash or mobile_money. NULL on historical rows (before the split) — treated as cash."""
     amount: int
     """Positive for money in, negative for money out."""
     reason: str | None = None
+    category: str | None = None
+    """Expense category chosen by the employee (transport, fournisseur, loyer...). Free text."""
     sale_id: uuid.UUID | None = Field(default=None, foreign_key="sale.id")
+    customer_id: uuid.UUID | None = Field(default=None, foreign_key="customer.id")
+    """Linked to a Customer on credit_repayment movements."""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -82,7 +99,14 @@ class AuditLog(SQLModel, table=True):
 
 
 class DailyClosing(SQLModel, table=True):
-    """The signature end-of-day reconciliation: expected cash vs counted cash."""
+    """The signature end-of-day reconciliation: expected cash vs counted cash.
+
+    Three independent halves, one per channel: cash (expected_cash/actual_cash/difference),
+    Mobile Money (expected_momo/actual_momo/difference_momo), Orange Money
+    (expected_orange/actual_orange/difference_orange). Historical rows only carry the cash
+    half; rows recorded before Orange Money existed as a channel carry cash+momo but not
+    orange — all nullable for that reason, never backfilled.
+    """
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     client_uuid: uuid.UUID = Field(unique=True, index=True)
@@ -92,5 +116,11 @@ class DailyClosing(SQLModel, table=True):
     expected_cash: int
     actual_cash: int
     difference: int
+    expected_momo: int | None = None
+    actual_momo: int | None = None
+    difference_momo: int | None = None
+    expected_orange: int | None = None
+    actual_orange: int | None = None
+    difference_orange: int | None = None
     note: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

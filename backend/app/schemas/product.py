@@ -9,6 +9,9 @@ class ProductCreate(BaseModel):
     purchase_price: int = 0
     selling_price: int = 0
     minimum_stock: int = 0
+    barcode: str | None = None
+    category: str | None = None
+    is_stockable: bool = True
 
 
 class ProductUpdate(BaseModel):
@@ -17,6 +20,9 @@ class ProductUpdate(BaseModel):
     selling_price: int | None = None
     minimum_stock: int | None = None
     is_active: bool | None = None
+    barcode: str | None = None
+    category: str | None = None
+    is_stockable: bool | None = None
 
 
 class ProductOut(BaseModel):
@@ -29,6 +35,9 @@ class ProductOut(BaseModel):
     selling_price: int
     minimum_stock: int
     is_active: bool
+    barcode: str | None = None
+    category: str | None = None
+    is_stockable: bool = True
 
 
 class ProductOutRestricted(BaseModel):
@@ -40,3 +49,6 @@ class ProductOutRestricted(BaseModel):
     selling_price: int
     minimum_stock: int
     is_active: bool
+    barcode: str | None = None
+    category: str | None = None
+    is_stockable: bool = True

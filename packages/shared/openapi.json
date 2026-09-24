@@ -28,15 +28,65 @@
         ],
         "summary": "Register",
         "operationId": "register_auth_register_business_post",
+        "parameters": [
+          {
+            "name": "x-device-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "name": "x-platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Platform"
+            }
+          },
+          {
+            "name": "x-app-version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-App-Version"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RegisterBusinessRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -69,15 +119,65 @@
         ],
         "summary": "Login Route",
         "operationId": "login_route_auth_login_post",
+        "parameters": [
+          {
+            "name": "x-device-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Device-Id"
+            }
+          },
+          {
+            "name": "x-platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Platform"
+            }
+          },
+          {
+            "name": "x-app-version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-App-Version"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/LoginRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -175,6 +275,65 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/auth/employees/{user_id}": {
+      "patch": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Update Employee Route",
+        "description": "Modifier un employ\u00e9. Le r\u00f4le est immuable \u2014 un employ\u00e9 ne peut jamais\ndevenir owner via cette route, et aucun employ\u00e9 ne peut se modifier lui-m\u00eame.",
+        "operationId": "update_employee_route_auth_employees__user_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmployeeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/products": {
@@ -378,6 +537,131 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProductOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "List All",
+        "description": "Liste des clients et leur solde d\u00fb \u2014 calcul\u00e9 \u00e0 la vol\u00e9e depuis les\n\u00e9v\u00e9nements (ventes \u00e0 cr\u00e9dit \u2212 remboursements), jamais stock\u00e9.",
+        "operationId": "list_all_customers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerOut"
+                  },
+                  "type": "array",
+                  "title": "Response List All Customers Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Create",
+        "description": "Cr\u00e9er un client cr\u00e9dit (sur place, pour une vente \u00e0 cr\u00e9dit imm\u00e9diate).",
+        "operationId": "create_customers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/customers/{customer_id}": {
+      "get": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Get One",
+        "description": "Fiche client : solde d\u00fb + historique (ventes \u00e0 cr\u00e9dit et remboursements).",
+        "operationId": "get_one_customers__customer_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerDetailOut"
                 }
               }
             }
@@ -684,6 +968,22 @@
               ],
               "title": "Since Daily Closings"
             }
+          },
+          {
+            "name": "since_customers",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since Customers"
+            }
           }
         ],
         "responses": {
@@ -709,10 +1009,2871 @@
           }
         }
       }
+    },
+    "/admin/auth/login": {
+      "post": {
+        "tags": [
+          "admin-auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_admin_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/overview": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Overview",
+        "operationId": "overview_admin_overview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOverviewOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/admin/alerts": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Alerts",
+        "operationId": "alerts_admin_alerts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AlertOut"
+                  },
+                  "type": "array",
+                  "title": "Response Alerts Admin Alerts Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/admin/search": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Search",
+        "operationId": "search_admin_search_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SearchHit"
+                  },
+                  "title": "Response Search Admin Search Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/businesses": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Businesses",
+        "operationId": "businesses_admin_businesses_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessListItemOut"
+                  },
+                  "type": "array",
+                  "title": "Response Businesses Admin Businesses Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/admin/businesses/{business_id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Business Detail",
+        "operationId": "business_detail_admin_businesses__business_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "business_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Business Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/analytics": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Analytics",
+        "operationId": "analytics_admin_analytics_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 30,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Platform"
+            }
+          },
+          {
+            "name": "app_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "App Version"
+            }
+          },
+          {
+            "name": "activity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Activity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/monitoring": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Monitoring",
+        "operationId": "monitoring_admin_monitoring_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/admin/devices": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Devices",
+        "operationId": "devices_admin_devices_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "business_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Business Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceOut"
+                  },
+                  "title": "Response Devices Admin Devices Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/businesses/{business_id}/suspend": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Suspend",
+        "operationId": "suspend_admin_businesses__business_id__suspend_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "business_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Business Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/businesses/{business_id}/reactivate": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Reactivate",
+        "operationId": "reactivate_admin_businesses__business_id__reactivate_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "business_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Business Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/businesses/{business_id}/subscription": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Change Subscription",
+        "description": "View/change plan, extend a trial, suspend/reactivate the subscription (cahier \u00a715).",
+        "operationId": "change_subscription_admin_businesses__business_id__subscription_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "business_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Business Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/businesses/{business_id}/users/{user_id}/deactivate": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Deactivate Business User",
+        "operationId": "deactivate_business_user_admin_businesses__business_id__users__user_id__deactivate_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "business_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Business Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/businesses/{business_id}/notes": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Add Note",
+        "operationId": "add_note_admin_businesses__business_id__notes_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "business_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Business Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tickets": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Tickets",
+        "operationId": "tickets_admin_tickets_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status_filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status Filter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TicketOut"
+                  },
+                  "title": "Response Tickets Admin Tickets Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create Ticket",
+        "operationId": "create_ticket_admin_tickets_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tickets/{ticket_id}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Update Ticket",
+        "operationId": "update_ticket_admin_tickets__ticket_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ticket Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/billing": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Billing",
+        "operationId": "billing_admin_billing_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/admin/plans": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create Plan",
+        "operationId": "create_plan_admin_plans_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/admin/plans/{plan_id}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Update Plan",
+        "operationId": "update_plan_admin_plans__plan_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/admins": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List Admins",
+        "operationId": "list_admins_admin_admins_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminUserOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Admins Admin Admins Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create Admin",
+        "operationId": "create_admin_admin_admins_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/admin/admins/{admin_id}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Update Admin",
+        "operationId": "update_admin_admin_admins__admin_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "admin_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Admin Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/audit": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Audit Log",
+        "operationId": "audit_log_admin_audit_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminAuditOut"
+                  },
+                  "title": "Response Audit Log Admin Audit Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/anomalies": {
+      "get": {
+        "tags": [
+          "anomalies"
+        ],
+        "summary": "Anomalies",
+        "operationId": "anomalies_anomalies_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 14,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "only_open",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Only Open"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AnomalyOut"
+                  },
+                  "title": "Response Anomalies Anomalies Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/anomalies/{anomaly_type}/{source_id}/operations": {
+      "get": {
+        "tags": [
+          "anomalies"
+        ],
+        "summary": "Operations",
+        "operationId": "operations_anomalies__anomaly_type___source_id__operations_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "anomaly_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Anomaly Type"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Source Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RelatedOperationOut"
+                  },
+                  "title": "Response Operations Anomalies  Anomaly Type   Source Id  Operations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/anomalies/{anomaly_type}/{source_id}/resolve": {
+      "post": {
+        "tags": [
+          "anomalies"
+        ],
+        "summary": "Resolve",
+        "operationId": "resolve_anomalies__anomaly_type___source_id__resolve_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "anomaly_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Anomaly Type"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Source Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnomalyResolveIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/business/me": {
+      "get": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Get Me",
+        "operationId": "get_me_business_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Update Me",
+        "operationId": "update_me_business_me_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/reports/summary": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Summary",
+        "operationId": "summary_reports_summary_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "product_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "payment_method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Payment Method"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/daily.pdf": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Daily Pdf",
+        "operationId": "daily_pdf_reports_daily_pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "day",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Day"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/stock.pdf": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Stock Pdf",
+        "operationId": "stock_pdf_reports_stock_pdf_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/reports/employee.pdf": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Employee Pdf",
+        "operationId": "employee_pdf_reports_employee_pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/anomalies.pdf": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Anomalies Pdf",
+        "operationId": "anomalies_pdf_reports_anomalies_pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 30,
+              "title": "Days"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/receipts.pdf": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Receipt Basket",
+        "operationId": "receipt_basket_receipts_pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "refs",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Refs"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invoices.pdf": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Invoice Basket",
+        "operationId": "invoice_basket_invoices_pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "refs",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Refs"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/receipts/{ref}.pdf": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Receipt",
+        "operationId": "receipt_receipts__ref__pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ref"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invoices/{ref}.pdf": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Invoice",
+        "operationId": "invoice_invoices__ref__pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ref"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shifts": {
+      "get": {
+        "tags": [
+          "shifts"
+        ],
+        "summary": "List Shifts",
+        "description": "Owner: every shift of the business (who opened, cash gap). Employee: only their own.",
+        "operationId": "list_shifts_shifts_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShiftOut"
+                  },
+                  "title": "Response List Shifts Shifts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/telemetry/heartbeat": {
+      "post": {
+        "tags": [
+          "telemetry"
+        ],
+        "summary": "Post Heartbeat",
+        "operationId": "post_heartbeat_telemetry_heartbeat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
+      "AdminAuditOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "At"
+          },
+          "admin_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admin Name"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "target_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Type"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "at",
+          "admin_name",
+          "action",
+          "target_type",
+          "target_id",
+          "details"
+        ],
+        "title": "AdminAuditOut"
+      },
+      "AdminLoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "AdminLoginRequest"
+      },
+      "AdminOverviewOut": {
+        "properties": {
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "businesses_total": {
+            "type": "integer",
+            "title": "Businesses Total"
+          },
+          "businesses_active_7d": {
+            "type": "integer",
+            "title": "Businesses Active 7D"
+          },
+          "businesses_new_7d": {
+            "type": "integer",
+            "title": "Businesses New 7D"
+          },
+          "businesses_new_30d": {
+            "type": "integer",
+            "title": "Businesses New 30D"
+          },
+          "businesses_first_sale_30d": {
+            "type": "integer",
+            "title": "Businesses First Sale 30D"
+          },
+          "businesses_without_activity": {
+            "type": "integer",
+            "title": "Businesses Without Activity"
+          },
+          "users_active_today": {
+            "type": "integer",
+            "title": "Users Active Today"
+          },
+          "users_active_7d": {
+            "type": "integer",
+            "title": "Users Active 7D"
+          },
+          "users_active_30d": {
+            "type": "integer",
+            "title": "Users Active 30D"
+          },
+          "sales_count_30d": {
+            "type": "integer",
+            "title": "Sales Count 30D"
+          },
+          "sales_total_30d": {
+            "type": "integer",
+            "title": "Sales Total 30D"
+          },
+          "sales_count_today": {
+            "type": "integer",
+            "title": "Sales Count Today"
+          },
+          "employees_total": {
+            "type": "integer",
+            "title": "Employees Total"
+          },
+          "devices_total": {
+            "type": "integer",
+            "title": "Devices Total"
+          },
+          "shops_total": {
+            "type": "integer",
+            "title": "Shops Total"
+          },
+          "subscriptions_active": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscriptions Active"
+          },
+          "subscriptions_trial": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscriptions Trial"
+          },
+          "subscriptions_expired": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscriptions Expired"
+          },
+          "payments_failed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payments Failed"
+          },
+          "mrr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mrr"
+          },
+          "devices_offline": {
+            "type": "integer",
+            "title": "Devices Offline"
+          },
+          "pending_ops_total": {
+            "type": "integer",
+            "title": "Pending Ops Total"
+          },
+          "sync_errors_24h": {
+            "type": "integer",
+            "title": "Sync Errors 24H"
+          },
+          "server_errors_24h": {
+            "type": "integer",
+            "title": "Server Errors 24H"
+          },
+          "open_incidents": {
+            "type": "integer",
+            "title": "Open Incidents"
+          },
+          "businesses_healthy": {
+            "type": "integer",
+            "title": "Businesses Healthy"
+          },
+          "businesses_to_watch": {
+            "type": "integer",
+            "title": "Businesses To Watch"
+          },
+          "businesses_at_risk": {
+            "type": "integer",
+            "title": "Businesses At Risk"
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/AlertOut"
+            },
+            "type": "array",
+            "title": "Alerts"
+          },
+          "funnel": {
+            "items": {
+              "$ref": "#/components/schemas/FunnelStep"
+            },
+            "type": "array",
+            "title": "Funnel"
+          },
+          "active_businesses_series": {
+            "items": {
+              "$ref": "#/components/schemas/SeriesPoint"
+            },
+            "type": "array",
+            "title": "Active Businesses Series"
+          },
+          "active_users_series": {
+            "items": {
+              "$ref": "#/components/schemas/SeriesPoint"
+            },
+            "type": "array",
+            "title": "Active Users Series"
+          },
+          "top_features": {
+            "items": {
+              "$ref": "#/components/schemas/FeatureUsageOut"
+            },
+            "type": "array",
+            "title": "Top Features"
+          },
+          "inactive_recently": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessListItemOut"
+            },
+            "type": "array",
+            "title": "Inactive Recently"
+          }
+        },
+        "type": "object",
+        "required": [
+          "environment",
+          "generated_at",
+          "businesses_total",
+          "businesses_active_7d",
+          "businesses_new_7d",
+          "businesses_new_30d",
+          "businesses_first_sale_30d",
+          "businesses_without_activity",
+          "users_active_today",
+          "users_active_7d",
+          "users_active_30d",
+          "sales_count_30d",
+          "sales_total_30d",
+          "sales_count_today",
+          "employees_total",
+          "devices_total",
+          "shops_total",
+          "devices_offline",
+          "pending_ops_total",
+          "sync_errors_24h",
+          "server_errors_24h",
+          "open_incidents",
+          "businesses_healthy",
+          "businesses_to_watch",
+          "businesses_at_risk",
+          "alerts",
+          "funnel",
+          "active_businesses_series",
+          "active_users_series",
+          "top_features",
+          "inactive_recently"
+        ],
+        "title": "AdminOverviewOut"
+      },
+      "AdminTokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "super_admin_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Super Admin Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "role": {
+            "$ref": "#/components/schemas/SuperAdminRole"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment",
+            "default": "development"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "super_admin_id",
+          "email",
+          "full_name",
+          "role"
+        ],
+        "title": "AdminTokenResponse"
+      },
+      "AdminUserIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "role": {
+            "$ref": "#/components/schemas/SuperAdminRole",
+            "default": "support"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "full_name",
+          "password"
+        ],
+        "title": "AdminUserIn"
+      },
+      "AdminUserOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "role": {
+            "$ref": "#/components/schemas/SuperAdminRole"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "role",
+          "is_active",
+          "created_at"
+        ],
+        "title": "AdminUserOut"
+      },
+      "AdminUserUpdate": {
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SuperAdminRole"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "title": "AdminUserUpdate"
+      },
+      "AlertOut": {
+        "properties": {
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "business_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Id"
+          },
+          "business_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Name"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "severity",
+          "kind",
+          "title"
+        ],
+        "title": "AlertOut"
+      },
+      "AnalyticsOut": {
+        "properties": {
+          "period_days": {
+            "type": "integer",
+            "title": "Period Days"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "active_businesses": {
+            "type": "integer",
+            "title": "Active Businesses"
+          },
+          "feature_usage": {
+            "items": {
+              "$ref": "#/components/schemas/FeatureUsageOut"
+            },
+            "type": "array",
+            "title": "Feature Usage"
+          },
+          "funnel": {
+            "items": {
+              "$ref": "#/components/schemas/FunnelStep"
+            },
+            "type": "array",
+            "title": "Funnel"
+          },
+          "retention_d7": {
+            "$ref": "#/components/schemas/RetentionOut"
+          },
+          "retention_d30": {
+            "$ref": "#/components/schemas/RetentionOut"
+          },
+          "dau": {
+            "type": "integer",
+            "title": "Dau"
+          },
+          "wau": {
+            "type": "integer",
+            "title": "Wau"
+          },
+          "mau": {
+            "type": "integer",
+            "title": "Mau"
+          },
+          "activation_rate": {
+            "type": "number",
+            "title": "Activation Rate"
+          },
+          "series_active_businesses": {
+            "items": {
+              "$ref": "#/components/schemas/SeriesPoint"
+            },
+            "type": "array",
+            "title": "Series Active Businesses"
+          },
+          "series_new_businesses": {
+            "items": {
+              "$ref": "#/components/schemas/SeriesPoint"
+            },
+            "type": "array",
+            "title": "Series New Businesses"
+          },
+          "series_active_users": {
+            "items": {
+              "$ref": "#/components/schemas/SeriesPoint"
+            },
+            "type": "array",
+            "title": "Series Active Users"
+          },
+          "versions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Versions"
+          },
+          "platforms": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Platforms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period_days",
+          "generated_at",
+          "active_businesses",
+          "feature_usage",
+          "funnel",
+          "retention_d7",
+          "retention_d30",
+          "dau",
+          "wau",
+          "mau",
+          "activation_rate",
+          "series_active_businesses",
+          "series_new_businesses",
+          "series_active_users",
+          "versions",
+          "platforms"
+        ],
+        "title": "AnalyticsOut"
+      },
+      "AnomalyOut": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "probable_cause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probable Cause"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              }
+            ],
+            "title": "Date"
+          },
+          "product_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Name"
+          },
+          "user_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Name"
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "resolution_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "label",
+          "date",
+          "source_type",
+          "source_id",
+          "status"
+        ],
+        "title": "AnomalyOut",
+        "description": "One derived anomaly shown in the web /anomalies screen.\n\n`amount` is a signed FCFA gap (closing) or a negative quantity delta (stock)\nor a price deviation \u2014 the exact meaning depends on `kind`."
+      },
+      "AnomalyResolveIn": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "title": "AnomalyResolveIn"
+      },
       "AuditLogOut": {
         "properties": {
           "id": {
@@ -783,6 +3944,751 @@
         "title": "AuditLogOut",
         "description": "Une ligne du journal : qui a fait quoi, quand \u2014 et sur quel objet."
       },
+      "BillingOut": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/PlanOut"
+            },
+            "type": "array",
+            "title": "Plans"
+          },
+          "by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Status"
+          },
+          "mrr": {
+            "type": "integer",
+            "title": "Mrr"
+          },
+          "arr": {
+            "type": "integer",
+            "title": "Arr"
+          },
+          "trials_started_30d": {
+            "type": "integer",
+            "title": "Trials Started 30D"
+          },
+          "trials_converted_30d": {
+            "type": "integer",
+            "title": "Trials Converted 30D"
+          },
+          "failed_or_unpaid": {
+            "type": "integer",
+            "title": "Failed Or Unpaid"
+          },
+          "expired": {
+            "type": "integer",
+            "title": "Expired"
+          },
+          "subscriptions": {
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionRowOut"
+            },
+            "type": "array",
+            "title": "Subscriptions"
+          },
+          "revenue_note": {
+            "type": "string",
+            "title": "Revenue Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "plans",
+          "by_status",
+          "mrr",
+          "arr",
+          "trials_started_30d",
+          "trials_converted_30d",
+          "failed_or_unpaid",
+          "expired",
+          "subscriptions",
+          "revenue_note"
+        ],
+        "title": "BillingOut"
+      },
+      "BusinessDetailOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "business_code": {
+            "type": "string",
+            "title": "Business Code"
+          },
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "is_suspended": {
+            "type": "boolean",
+            "title": "Is Suspended"
+          },
+          "owner_full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Full Name"
+          },
+          "owner_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Phone"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "plan_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Name"
+          },
+          "subscription_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Status"
+          },
+          "subscription_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Started At"
+          },
+          "subscription_ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Ends At"
+          },
+          "health": {
+            "$ref": "#/components/schemas/BusinessHealthStatus"
+          },
+          "employee_count": {
+            "type": "integer",
+            "title": "Employee Count"
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count"
+          },
+          "customer_count": {
+            "type": "integer",
+            "title": "Customer Count",
+            "default": 0
+          },
+          "device_count": {
+            "type": "integer",
+            "title": "Device Count",
+            "default": 0
+          },
+          "sales_count_today": {
+            "type": "integer",
+            "title": "Sales Count Today",
+            "default": 0
+          },
+          "sales_count_7d": {
+            "type": "integer",
+            "title": "Sales Count 7D",
+            "default": 0
+          },
+          "sales_count_30d": {
+            "type": "integer",
+            "title": "Sales Count 30D"
+          },
+          "sales_total_30d": {
+            "type": "integer",
+            "title": "Sales Total 30D"
+          },
+          "active_users_7d": {
+            "type": "integer",
+            "title": "Active Users 7D",
+            "default": 0
+          },
+          "active_days_30d": {
+            "type": "integer",
+            "title": "Active Days 30D",
+            "default": 0
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/FeatureUsageOut"
+            },
+            "type": "array",
+            "title": "Features",
+            "default": []
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceOut"
+            },
+            "type": "array",
+            "title": "Devices",
+            "default": []
+          },
+          "pending_ops": {
+            "type": "integer",
+            "title": "Pending Ops",
+            "default": 0
+          },
+          "last_sync_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sync At"
+          },
+          "errors_7d": {
+            "type": "integer",
+            "title": "Errors 7D",
+            "default": 0
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/EventOut"
+            },
+            "type": "array",
+            "title": "History",
+            "default": []
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/NoteOut"
+            },
+            "type": "array",
+            "title": "Notes",
+            "default": []
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/TicketOut"
+            },
+            "type": "array",
+            "title": "Tickets",
+            "default": []
+          },
+          "users": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Users",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "business_code",
+          "sector",
+          "created_at",
+          "is_suspended",
+          "owner_full_name",
+          "owner_phone",
+          "plan_name",
+          "subscription_status",
+          "subscription_started_at",
+          "health",
+          "employee_count",
+          "product_count",
+          "sales_count_30d",
+          "sales_total_30d"
+        ],
+        "title": "BusinessDetailOut"
+      },
+      "BusinessHealthStatus": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "last_activity_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity At"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "last_activity_at"
+        ],
+        "title": "BusinessHealthStatus",
+        "description": "\u00ab healthy \u00bb / \u00ab a_surveiller \u00bb / \u00ab a_risque \u00bb \u2014 computed from configurable, measurable\nrules (days without activity, blocked sync, failed payment), never an arbitrary score.\n`reasons` says which rule fired so the team can act (cahier Super Admin \u00a78)."
+      },
+      "BusinessListItemOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "business_code": {
+            "type": "string",
+            "title": "Business Code"
+          },
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "owner_full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Full Name"
+          },
+          "owner_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Phone"
+          },
+          "employee_count": {
+            "type": "integer",
+            "title": "Employee Count"
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count",
+            "default": 0
+          },
+          "device_count": {
+            "type": "integer",
+            "title": "Device Count",
+            "default": 0
+          },
+          "plan_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Name"
+          },
+          "subscription_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Status"
+          },
+          "subscription_ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscription Ends At"
+          },
+          "is_suspended": {
+            "type": "boolean",
+            "title": "Is Suspended",
+            "default": false
+          },
+          "last_activity_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity At"
+          },
+          "sales_7d": {
+            "type": "integer",
+            "title": "Sales 7D",
+            "default": 0
+          },
+          "last_sync_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sync At"
+          },
+          "pending_ops": {
+            "type": "integer",
+            "title": "Pending Ops",
+            "default": 0
+          },
+          "errors_7d": {
+            "type": "integer",
+            "title": "Errors 7D",
+            "default": 0
+          },
+          "app_versions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "App Versions",
+            "default": []
+          },
+          "platforms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Platforms",
+            "default": []
+          },
+          "health": {
+            "$ref": "#/components/schemas/BusinessHealthStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "business_code",
+          "sector",
+          "created_at",
+          "owner_full_name",
+          "employee_count",
+          "plan_name",
+          "subscription_status",
+          "health"
+        ],
+        "title": "BusinessListItemOut"
+      },
+      "BusinessOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "business_code": {
+            "type": "string",
+            "title": "Business Code"
+          },
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "logo_data": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "business_code"
+        ],
+        "title": "BusinessOut"
+      },
+      "BusinessUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "logo_data": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Data"
+          }
+        },
+        "type": "object",
+        "title": "BusinessUpdate"
+      },
+      "ConfirmIn": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "ConfirmIn"
+      },
       "CreateEmployeeRequest": {
         "properties": {
           "full_name": {
@@ -824,6 +4730,243 @@
         ],
         "title": "CreateEmployeeRequest"
       },
+      "CreditRepaymentIn": {
+        "properties": {
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/MoneyMovementChannel"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_uuid",
+          "customer_id",
+          "amount",
+          "channel"
+        ],
+        "title": "CreditRepaymentIn"
+      },
+      "CustomerDetailOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "balance": {
+            "type": "integer",
+            "title": "Balance"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "transactions": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerTransactionOut"
+            },
+            "type": "array",
+            "title": "Transactions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "client_uuid",
+          "full_name",
+          "balance",
+          "created_at",
+          "transactions"
+        ],
+        "title": "CustomerDetailOut",
+        "description": "Full view: balance + ordered transaction history."
+      },
+      "CustomerIn": {
+        "properties": {
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_uuid",
+          "full_name"
+        ],
+        "title": "CustomerIn"
+      },
+      "CustomerOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "balance": {
+            "type": "integer",
+            "title": "Balance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "client_uuid",
+          "full_name",
+          "balance"
+        ],
+        "title": "CustomerOut",
+        "description": "Public view for the /customers endpoints."
+      },
+      "CustomerTransactionOut": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          },
+          "product_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Name"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "created_at",
+          "amount"
+        ],
+        "title": "CustomerTransactionOut",
+        "description": "One line of a customer's history: a credit sale or a repayment."
+      },
       "DailyClosingIn": {
         "properties": {
           "client_uuid": {
@@ -839,6 +4982,14 @@
           "actual_cash": {
             "type": "integer",
             "title": "Actual Cash"
+          },
+          "actual_momo": {
+            "type": "integer",
+            "title": "Actual Momo"
+          },
+          "actual_orange": {
+            "type": "integer",
+            "title": "Actual Orange"
           },
           "note": {
             "anyOf": [
@@ -856,10 +5007,12 @@
         "required": [
           "client_uuid",
           "closing_date",
-          "actual_cash"
+          "actual_cash",
+          "actual_momo",
+          "actual_orange"
         ],
         "title": "DailyClosingIn",
-        "description": "No `expected_cash` here on purpose: it is computed server-side from recorded money\nmovements, never trusted from the client \u2014 see documentation/SYNC_DESIGN.md."
+        "description": "No `expected_cash`/`expected_momo` here on purpose: they are computed\nserver-side from recorded money movements, never trusted from the client \u2014\nsee documentation/SYNC_DESIGN.md."
       },
       "DashboardOut": {
         "properties": {
@@ -935,6 +5088,134 @@
         ],
         "title": "DashboardOut"
       },
+      "DeviceOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "business_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Business Id"
+          },
+          "business_name": {
+            "type": "string",
+            "title": "Business Name"
+          },
+          "device_ref": {
+            "type": "string",
+            "title": "Device Ref"
+          },
+          "platform": {
+            "type": "string",
+            "title": "Platform"
+          },
+          "app_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Version"
+          },
+          "user_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Name"
+          },
+          "first_seen_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "First Seen At"
+          },
+          "last_seen_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Seen At"
+          },
+          "last_sync_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sync At"
+          },
+          "last_sync_ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sync Ok"
+          },
+          "last_sync_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sync Error"
+          },
+          "pending_ops": {
+            "type": "integer",
+            "title": "Pending Ops"
+          },
+          "rejected_ops": {
+            "type": "integer",
+            "title": "Rejected Ops"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "obsolete": {
+            "type": "boolean",
+            "title": "Obsolete"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "business_id",
+          "business_name",
+          "device_ref",
+          "platform",
+          "app_version",
+          "user_name",
+          "first_seen_at",
+          "last_seen_at",
+          "last_sync_at",
+          "last_sync_ok",
+          "last_sync_error",
+          "pending_ops",
+          "rejected_ops",
+          "status",
+          "obsolete"
+        ],
+        "title": "DeviceOut"
+      },
       "EmployeeActivityOut": {
         "properties": {
           "user_id": {
@@ -964,6 +5245,74 @@
         ],
         "title": "EmployeeActivityOut"
       },
+      "EventOut": {
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "At"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "platform": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Platform"
+          },
+          "app_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "at",
+          "type",
+          "source"
+        ],
+        "title": "EventOut"
+      },
       "ExpectedCashOut": {
         "properties": {
           "closing_date": {
@@ -974,6 +5323,14 @@
           "expected_cash": {
             "type": "integer",
             "title": "Expected Cash"
+          },
+          "expected_momo": {
+            "type": "integer",
+            "title": "Expected Momo"
+          },
+          "expected_orange": {
+            "type": "integer",
+            "title": "Expected Orange"
           },
           "sales_total": {
             "type": "integer",
@@ -990,18 +5347,98 @@
           "withdrawal_total": {
             "type": "integer",
             "title": "Withdrawal Total"
+          },
+          "credit_repayment_total": {
+            "type": "integer",
+            "title": "Credit Repayment Total"
           }
         },
         "type": "object",
         "required": [
           "closing_date",
           "expected_cash",
+          "expected_momo",
+          "expected_orange",
           "sales_total",
           "income_total",
           "expense_total",
-          "withdrawal_total"
+          "withdrawal_total",
+          "credit_repayment_total"
         ],
         "title": "ExpectedCashOut"
+      },
+      "FeatureUsageOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "businesses": {
+            "type": "integer",
+            "title": "Businesses"
+          },
+          "percent": {
+            "type": "number",
+            "title": "Percent"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available",
+            "default": true
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "businesses",
+          "percent"
+        ],
+        "title": "FeatureUsageOut"
+      },
+      "FunnelStep": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "percent": {
+            "type": "number",
+            "title": "Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "count",
+          "percent"
+        ],
+        "title": "FunnelStep"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1015,6 +5452,83 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HeartbeatIn": {
+        "properties": {
+          "device_key": {
+            "type": "string",
+            "title": "Device Key"
+          },
+          "platform": {
+            "type": "string",
+            "title": "Platform"
+          },
+          "app_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Version"
+          },
+          "pending_ops": {
+            "type": "integer",
+            "title": "Pending Ops",
+            "default": 0
+          },
+          "rejected_ops": {
+            "type": "integer",
+            "title": "Rejected Ops",
+            "default": 0
+          },
+          "sync_ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync Ok"
+          },
+          "sync_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync Error"
+          },
+          "pushed": {
+            "type": "integer",
+            "title": "Pushed",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_key",
+          "platform"
+        ],
+        "title": "HeartbeatIn"
+      },
+      "HeartbeatOut": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "HeartbeatOut"
       },
       "LatestClosingOut": {
         "properties": {
@@ -1083,7 +5597,7 @@
           "withdrawal"
         ],
         "title": "ManualMoneyMovementType",
-        "description": "Excludes \"sale\": that type is only ever derived server-side from a Sale event."
+        "description": "Excludes \"sale\" and \"credit_repayment\": those are only ever derived\nserver-side from a Sale / CreditRepaymentIn event."
       },
       "ManualStockMovementType": {
         "type": "string",
@@ -1094,6 +5608,15 @@
         "title": "ManualStockMovementType",
         "description": "Excludes \"sale\": that type is only ever derived server-side from a Sale event."
       },
+      "MoneyMovementChannel": {
+        "type": "string",
+        "enum": [
+          "cash",
+          "mobile_money",
+          "orange_money"
+        ],
+        "title": "MoneyMovementChannel"
+      },
       "MoneyMovementIn": {
         "properties": {
           "client_uuid": {
@@ -1103,6 +5626,9 @@
           },
           "type": {
             "$ref": "#/components/schemas/ManualMoneyMovementType"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/MoneyMovementChannel"
           },
           "amount": {
             "type": "integer",
@@ -1118,15 +5644,288 @@
               }
             ],
             "title": "Reason"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
           }
         },
         "type": "object",
         "required": [
           "client_uuid",
           "type",
+          "channel",
           "amount"
         ],
         "title": "MoneyMovementIn"
+      },
+      "MonitoringOut": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "devices_total": {
+            "type": "integer",
+            "title": "Devices Total"
+          },
+          "devices_online": {
+            "type": "integer",
+            "title": "Devices Online"
+          },
+          "devices_offline": {
+            "type": "integer",
+            "title": "Devices Offline"
+          },
+          "pending_ops_total": {
+            "type": "integer",
+            "title": "Pending Ops Total"
+          },
+          "rejected_ops_total": {
+            "type": "integer",
+            "title": "Rejected Ops Total"
+          },
+          "sync_errors_24h": {
+            "type": "integer",
+            "title": "Sync Errors 24H"
+          },
+          "server_errors_24h": {
+            "type": "integer",
+            "title": "Server Errors 24H"
+          },
+          "outdated_devices": {
+            "type": "integer",
+            "title": "Outdated Devices"
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/AlertOut"
+            },
+            "type": "array",
+            "title": "Alerts"
+          },
+          "stale_devices": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceOut"
+            },
+            "type": "array",
+            "title": "Stale Devices"
+          },
+          "recent_errors": {
+            "items": {
+              "$ref": "#/components/schemas/EventOut"
+            },
+            "type": "array",
+            "title": "Recent Errors"
+          },
+          "error_series": {
+            "items": {
+              "$ref": "#/components/schemas/SeriesPoint"
+            },
+            "type": "array",
+            "title": "Error Series"
+          },
+          "latest_versions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Latest Versions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "devices_total",
+          "devices_online",
+          "devices_offline",
+          "pending_ops_total",
+          "rejected_ops_total",
+          "sync_errors_24h",
+          "server_errors_24h",
+          "outdated_devices",
+          "alerts",
+          "stale_devices",
+          "recent_errors",
+          "error_series",
+          "latest_versions"
+        ],
+        "title": "MonitoringOut"
+      },
+      "NoteIn": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "NoteIn"
+      },
+      "NoteOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "admin_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admin Name"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "admin_name",
+          "text",
+          "created_at"
+        ],
+        "title": "NoteOut"
+      },
+      "PlanIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "price": {
+            "type": "integer",
+            "title": "Price"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period",
+            "default": "monthly"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "price"
+        ],
+        "title": "PlanIn"
+      },
+      "PlanOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "price": {
+            "type": "integer",
+            "title": "Price"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "subscribers": {
+            "type": "integer",
+            "title": "Subscribers",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "price",
+          "period",
+          "is_active"
+        ],
+        "title": "PlanOut"
+      },
+      "PlanUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "PlanUpdate"
       },
       "ProductCreate": {
         "properties": {
@@ -1153,6 +5952,33 @@
             "type": "integer",
             "title": "Minimum Stock",
             "default": 0
+          },
+          "barcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "is_stockable": {
+            "type": "boolean",
+            "title": "Is Stockable",
+            "default": true
           }
         },
         "type": "object",
@@ -1191,6 +6017,33 @@
           "is_active": {
             "type": "boolean",
             "title": "Is Active"
+          },
+          "barcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "is_stockable": {
+            "type": "boolean",
+            "title": "Is Stockable",
+            "default": true
           }
         },
         "type": "object",
@@ -1232,6 +6085,33 @@
           "is_active": {
             "type": "boolean",
             "title": "Is Active"
+          },
+          "barcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "is_stockable": {
+            "type": "boolean",
+            "title": "Is Stockable",
+            "default": true
           }
         },
         "type": "object",
@@ -1302,6 +6182,39 @@
               }
             ],
             "title": "Is Active"
+          },
+          "barcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "is_stockable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Stockable"
           }
         },
         "type": "object",
@@ -1341,6 +6254,14 @@
             "type": "array",
             "title": "Daily Closings"
           },
+          "customers": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Customers"
+          },
           "cursors": {
             "additionalProperties": {
               "anyOf": [
@@ -1362,6 +6283,7 @@
           "money_movements",
           "stock_movements",
           "daily_closings",
+          "customers",
           "cursors"
         ],
         "title": "PullResponse"
@@ -1398,6 +6320,30 @@
             },
             "type": "array",
             "title": "Daily Closings",
+            "default": []
+          },
+          "customers": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerIn"
+            },
+            "type": "array",
+            "title": "Customers",
+            "default": []
+          },
+          "credit_repayments": {
+            "items": {
+              "$ref": "#/components/schemas/CreditRepaymentIn"
+            },
+            "type": "array",
+            "title": "Credit Repayments",
+            "default": []
+          },
+          "shifts": {
+            "items": {
+              "$ref": "#/components/schemas/ShiftIn"
+            },
+            "type": "array",
+            "title": "Shifts",
             "default": []
           }
         },
@@ -1436,6 +6382,30 @@
             },
             "type": "array",
             "title": "Daily Closings",
+            "default": []
+          },
+          "customers": {
+            "items": {
+              "$ref": "#/components/schemas/PushResult"
+            },
+            "type": "array",
+            "title": "Customers",
+            "default": []
+          },
+          "shifts": {
+            "items": {
+              "$ref": "#/components/schemas/PushResult"
+            },
+            "type": "array",
+            "title": "Shifts",
+            "default": []
+          },
+          "credit_repayments": {
+            "items": {
+              "$ref": "#/components/schemas/PushResult"
+            },
+            "type": "array",
+            "title": "Credit Repayments",
             "default": []
           }
         },
@@ -1519,6 +6489,87 @@
         ],
         "title": "RegisterBusinessRequest"
       },
+      "RelatedOperationOut": {
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "At"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          },
+          "user_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "at",
+          "kind",
+          "label"
+        ],
+        "title": "RelatedOperationOut",
+        "description": "One operation that contributed to an anomaly (drill-down \"historique d'un \u00e9cart\")."
+      },
+      "RetentionOut": {
+        "properties": {
+          "eligible": {
+            "type": "integer",
+            "title": "Eligible"
+          },
+          "retained": {
+            "type": "integer",
+            "title": "Retained"
+          },
+          "percent": {
+            "type": "number",
+            "title": "Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "eligible",
+          "retained",
+          "percent"
+        ],
+        "title": "RetentionOut"
+      },
       "SaleIn": {
         "properties": {
           "client_uuid": {
@@ -1530,6 +6581,18 @@
             "type": "string",
             "format": "uuid",
             "title": "Product Id"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
           },
           "quantity": {
             "type": "integer",
@@ -1553,6 +6616,240 @@
           "payment_method"
         ],
         "title": "SaleIn"
+      },
+      "SearchHit": {
+        "properties": {
+          "business_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Business Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "business_code": {
+            "type": "string",
+            "title": "Business Code"
+          },
+          "owner_full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Full Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_id",
+          "name",
+          "business_code",
+          "owner_full_name"
+        ],
+        "title": "SearchHit"
+      },
+      "SeriesPoint": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "value": {
+            "type": "integer",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "value"
+        ],
+        "title": "SeriesPoint"
+      },
+      "ShiftIn": {
+        "properties": {
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "opened_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opened At"
+          },
+          "opening_cash": {
+            "type": "integer",
+            "title": "Opening Cash",
+            "default": 0
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "counted_cash": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counted Cash"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_uuid",
+          "opened_at"
+        ],
+        "title": "ShiftIn",
+        "description": "Opening and closing of one work session, idempotent on client_uuid: the first push\ncreates the shift (opened_at + opening_cash); a later push with closed_at + counted_cash\ncloses it. expected_cash / difference are computed server-side, never trusted."
+      },
+      "ShiftOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "client_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "user_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Name"
+          },
+          "opened_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opened At"
+          },
+          "opening_cash": {
+            "type": "integer",
+            "title": "Opening Cash"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "counted_cash": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counted Cash"
+          },
+          "expected_cash": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Cash"
+          },
+          "difference": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difference"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "operations_count": {
+            "type": "integer",
+            "title": "Operations Count",
+            "default": 0
+          },
+          "sales_total": {
+            "type": "integer",
+            "title": "Sales Total",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "client_uuid",
+          "user_id",
+          "user_name",
+          "opened_at",
+          "opening_cash",
+          "closed_at",
+          "counted_cash",
+          "expected_cash",
+          "difference",
+          "note"
+        ],
+        "title": "ShiftOut"
       },
       "StockAlertOut": {
         "properties": {
@@ -1623,6 +6920,287 @@
         ],
         "title": "StockMovementIn"
       },
+      "SubscriptionChange": {
+        "properties": {
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "extend_trial_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extend Trial Days"
+          },
+          "current_period_ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Period Ends At"
+          }
+        },
+        "type": "object",
+        "title": "SubscriptionChange"
+      },
+      "SubscriptionRowOut": {
+        "properties": {
+          "business_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Business Id"
+          },
+          "business_name": {
+            "type": "string",
+            "title": "Business Name"
+          },
+          "plan_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "trial_ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trial Ends At"
+          },
+          "current_period_ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Period Ends At"
+          },
+          "price": {
+            "type": "integer",
+            "title": "Price"
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_id",
+          "business_name",
+          "plan_name",
+          "status",
+          "started_at",
+          "trial_ends_at",
+          "current_period_ends_at",
+          "price"
+        ],
+        "title": "SubscriptionRowOut"
+      },
+      "SuperAdminRole": {
+        "type": "string",
+        "enum": [
+          "owner",
+          "product_manager",
+          "support",
+          "developer"
+        ],
+        "title": "SuperAdminRole"
+      },
+      "TicketIn": {
+        "properties": {
+          "business_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Business Id"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_id",
+          "subject"
+        ],
+        "title": "TicketIn"
+      },
+      "TicketOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "business_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Business Id"
+          },
+          "business_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Name"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "business_id",
+          "subject",
+          "description",
+          "status",
+          "created_by_name",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TicketOut"
+      },
+      "TicketUpdate": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "title": "TicketUpdate"
+      },
       "TokenResponse": {
         "properties": {
           "access_token": {
@@ -1648,6 +7226,10 @@
             "type": "string",
             "title": "Business Code"
           },
+          "business_name": {
+            "type": "string",
+            "title": "Business Name"
+          },
           "role": {
             "$ref": "#/components/schemas/UserRole"
           },
@@ -1670,6 +7252,7 @@
           "user_id",
           "business_id",
           "business_code",
+          "business_name",
           "role",
           "full_name",
           "can_view_purchase_prices",
@@ -1705,6 +7288,46 @@
           "revenue"
         ],
         "title": "TopProductOut"
+      },
+      "UpdateEmployeeRequest": {
+        "properties": {
+          "can_view_purchase_prices": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Can View Purchase Prices"
+          },
+          "can_view_owner_dashboard": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Can View Owner Dashboard"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "UpdateEmployeeRequest",
+        "description": "\u00c9dition/d\u00e9sactivation d'un employ\u00e9. Pas de `role` (immuable \u2014 voir\nauth_service.update_employee) et pas de `pin` (le PIN employ\u00e9 est cr\u00e9\u00e9 une\nfois \u00e0 sa cr\u00e9ation, on ne le r\u00e9\u00e9dite pas dans le MVP)."
       },
       "UserOut": {
         "properties": {

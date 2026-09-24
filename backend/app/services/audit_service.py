@@ -3,6 +3,7 @@ import uuid
 from sqlmodel import Session, select
 
 from app.models.catalog import Product
+from app.models.customer import Customer
 from app.models.events import AuditLog, MoneyMovement, Sale, StockMovement
 from app.models.user import User
 
@@ -87,6 +88,16 @@ def _entity_labels(
         for u in users:
             labels[("user", str(u.id))] = u.full_name
 
+    if "customer" in ids_by_type:
+        customers = session.exec(
+            select(Customer).where(
+                Customer.business_id == business_id,
+                Customer.id.in_(ids_by_type["customer"]),
+            )
+        ).all()
+        for c in customers:
+            labels[("customer", str(c.id))] = c.full_name
+
     if "sale" in ids_by_type:
         sales = session.exec(
             select(Sale, Product.name)
@@ -134,4 +145,7 @@ def _money_label(m: MoneyMovement) -> str:
         return f"Dépense {m.amount}"
     if m.type.value == "withdrawal":
         return f"Retrait {m.amount}"
+    if m.type.value == "credit_repayment":
+        channel = m.channel.value if m.channel else "cash"
+        return f"Remboursement crédit +{m.amount} ({channel})"
     return f"Vente +{m.amount}"

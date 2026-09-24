@@ -1,14 +1,32 @@
 import uuid
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlmodel import Session
 
 from app.core.security import InvalidToken, decode_access_token
 from app.db.session import get_session
+from app.models.business import Business
 from app.models.user import User, UserRole
 
 bearer_scheme = HTTPBearer()
+
+
+class ClientInfo:
+    """Who is calling: device / platform / app version sent by our own clients as headers."""
+
+    def __init__(self, device_key: str | None, platform: str | None, app_version: str | None):
+        self.device_key = device_key
+        self.platform = platform
+        self.app_version = app_version
+
+
+def get_client_info(
+    x_device_id: str | None = Header(default=None),
+    x_platform: str | None = Header(default=None),
+    x_app_version: str | None = Header(default=None),
+) -> ClientInfo:
+    return ClientInfo(x_device_id, x_platform, x_app_version)
 
 
 class CurrentUser:
@@ -39,6 +57,10 @@ def get_current_user(
     user = session.get(User, uuid.UUID(payload["sub"]))
     if user is None or not user.is_active:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Compte introuvable ou désactivé")
+
+    business = session.get(Business, user.business_id)
+    if business is not None and business.is_suspended:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Compte suspendu — contactez le support Korise")
 
     return CurrentUser(
         id=user.id,

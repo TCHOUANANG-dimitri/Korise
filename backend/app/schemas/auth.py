@@ -24,6 +24,7 @@ class TokenResponse(BaseModel):
     user_id: uuid.UUID
     business_id: uuid.UUID
     business_code: str
+    business_name: str
     role: UserRole
     full_name: str
     can_view_purchase_prices: bool
@@ -36,6 +37,16 @@ class CreateEmployeeRequest(BaseModel):
     pin: str = Field(min_length=4, max_length=8)
     can_view_purchase_prices: bool = False
     can_view_owner_dashboard: bool = False
+
+
+class UpdateEmployeeRequest(BaseModel):
+    """Édition/désactivation d'un employé. Pas de `role` (immuable — voir
+    auth_service.update_employee) et pas de `pin` (le PIN employé est créé une
+    fois à sa création, on ne le réédite pas dans le MVP)."""
+
+    can_view_purchase_prices: bool | None = None
+    can_view_owner_dashboard: bool | None = None
+    is_active: bool | None = None
 
 
 class UserOut(BaseModel):
