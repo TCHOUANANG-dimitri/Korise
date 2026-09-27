@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AlertTriangle from 'lucide-react-native/icons/triangle-alert';
 import Building2 from 'lucide-react-native/icons/building';
 import CheckCircle2 from 'lucide-react-native/icons/circle-check';
@@ -16,7 +17,8 @@ import { recoverBusinessCode, RecoverCodeResult } from '../api/authApi';
 type Mode = 'login' | 'register' | 'registered' | 'recover';
 
 export function AuthScreen() {
-  const { login, register, enterAfterRegister, apiBaseUrl } = useApp();
+  const { login, register, enterAfterRegister } = useApp();
+  const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<Mode>('login');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export function AuthScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.root}
+      style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -212,8 +214,6 @@ export function AuthScreen() {
             <Button title="J’ai déjà un code" variant="secondary" onPress={() => { setError(null); setMode('login'); }} disabled={busy} />
           </Card>
         )}
-
-        <Text style={[typo.muted, styles.footer]}>{apiBaseUrl}</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -238,5 +238,4 @@ const styles = StyleSheet.create({
   inlineIcon: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, marginTop: -SPACING.sm, marginBottom: SPACING.xs },
   errorLine: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.md },
   errorText: { fontFamily: typo.body.fontFamily, fontSize: 13, color: palette.danger, flex: 1 },
-  footer: { textAlign: 'center', marginTop: SPACING.lg, fontSize: 12 },
 });

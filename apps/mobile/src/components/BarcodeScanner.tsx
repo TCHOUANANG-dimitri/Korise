@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import X from 'lucide-react-native/icons/x';
 
 import { palette, RADIUS, SPACING, typo } from '../theme';
@@ -19,10 +20,11 @@ export function BarcodeScanner({
 }) {
   const [permission, requestPermission] = useCameraPermissions();
   const handled = useRef(false);
+  const insets = useSafeAreaInsets();
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.root}>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
+      <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.bar}>
           <Text style={[typo.heading, { color: palette.surface, flex: 1 }]}>Scanner un produit</Text>
           <Pressable onPress={onClose} hitSlop={12}>

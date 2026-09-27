@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import {
   BackHandler,
   Image,
-  Platform,
   Pressable,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { useFonts } from 'expo-font';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Signika_700Bold } from '@expo-google-fonts/signika/700Bold';
 import { Urbanist_400Regular } from '@expo-google-fonts/urbanist/400Regular';
 import { Urbanist_500Medium } from '@expo-google-fonts/urbanist/500Medium';
@@ -70,10 +69,12 @@ export default function App() {
   }
 
   return (
-    <AppProvider>
-      <StatusBar barStyle="light-content" backgroundColor={palette.background} />
-      <Root />
-    </AppProvider>
+    <SafeAreaProvider>
+      <AppProvider>
+        <StatusBar barStyle="light-content" backgroundColor={palette.background} />
+        <Root />
+      </AppProvider>
+    </SafeAreaProvider>
   );
 }
 
@@ -99,6 +100,10 @@ function Root() {
 function Shell() {
   const [tab, setTab] = useState<Tab>('home');
   const [sub, setSub] = useState<SubScreen | null>(null);
+  // Edge-to-edge (Android) : l'app dessine sous la barre d'état et sous la barre de navigation du
+  // téléphone. Les insets valent 0 là où il n'y a rien (plein écran), la hauteur de la barre de gestes
+  // ou des trois boutons sinon — la barre d'onglets se place juste au-dessus.
+  const insets = useSafeAreaInsets();
 
   // Le bouton retour d'Android ferme d'abord l'écran secondaire, puis revient à l'accueil.
   React.useEffect(() => {
@@ -144,7 +149,7 @@ function Shell() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }]}>
       <TopBar />
       <View style={styles.body}>
         {sub ? (
@@ -159,7 +164,7 @@ function Shell() {
           </>
         )}
       </View>
-      <View style={styles.tabBar}>
+      <View style={[styles.tabBar, { paddingBottom: SPACING.sm + insets.bottom }]}>
         {TABS.map(({ key, label, Icon }) => {
           const active = key === tab && !sub;
           const color = active ? palette.accent : palette.textMuted;
@@ -179,14 +184,14 @@ function Shell() {
           );
         })}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   splash: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
   splashIcon: { width: 96, height: 96, borderRadius: RADIUS.card },
-  safe: { flex: 1, backgroundColor: palette.background, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0 },
+  safe: { flex: 1, backgroundColor: palette.background },
   body: { flex: 1 },
   tabBar: {
     flexDirection: 'row',
@@ -194,7 +199,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#22242A',
     paddingTop: SPACING.sm,
-    paddingBottom: Platform.OS === 'ios' ? SPACING.xl : SPACING.sm,
   },
   tab: { flex: 1, alignItems: 'center', gap: 4 },
   tabLabel: { fontFamily: typo.microLabel.fontFamily, fontSize: 11, letterSpacing: 0.4 },
