@@ -133,12 +133,15 @@ export async function initStore(): Promise<void> {
 // Le catalogue produit vient du backend (`GET /products`), jamais de fixtures.
 // Best-effort : si hors-ligne, on garde le cache local existant tel quel.
 export async function syncProductsFromServer(): Promise<void> {
+  const businessId = getSession()?.business_id;
   let remote: ProductApi[];
   try {
     remote = await fetchProducts();
   } catch {
     return;
   }
+  // Catalogue d'un autre compte si la session a changé entre-temps : on l'ignore.
+  if (!businessId || getSession()?.business_id !== businessId) return;
   for (const p of remote) {
     await put<ProductRow>('products', {
       id: p.id,

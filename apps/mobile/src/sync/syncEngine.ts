@@ -17,6 +17,7 @@ import {
 } from '../db/repo';
 import { push as apiPush, pull as apiPull, PushBody } from './api';
 import { sendHeartbeat } from '../api/telemetryApi';
+import { getSessionSync } from '../auth/session';
 
 export type SyncState =
   | { phase: 'idle' }
@@ -60,13 +61,15 @@ class SyncEngine {
 
   async syncNow(): Promise<void> {
     if (this.syncing) return;
+    const businessId = getSessionSync()?.business_id;
+    if (!businessId) return;
     this.syncing = true;
     this.emit({ phase: 'syncing' });
 
     try {
-      const pushed = await this.pushOutbox();
-      const pulled = await this.doPull();
-      const newProducts = await this.refreshCatalog();
+      const pushed = await this.pushOutbox(businessId);
+      const pulled = await this.doPull(businessId);
+      const newProducts = await this.refreshCatalog(businessId);
       this.backoffMs = 2_000;
       this.emit({ phase: 'ok', lastSyncAt: new Date().toISOString(), pushed, pulled, newProducts });
       void this.reportHealth(true, null, pushed);
@@ -102,7 +105,13 @@ class SyncEngine {
     }, wait);
   }
 
-  private async pushOutbox(): Promise<number> {
+  // La base SQLite et le jeton suivent la session courante : si le compte change
+  // pendant une synchro, on s'arrête avant de mélanger les données de deux entreprises.
+  private assertSameBusiness(businessId: string): void {
+    if (getSessionSync()?.business_id !== businessId) throw new Error('Compte changé pendant la synchro');
+  }
+
+  private async pushOutbox(businessId: string): Promise<number> {
     const pending = getPendingOutbox();
     if (pending.length === 0) return 0;
 
@@ -145,7 +154,9 @@ class SyncEngine {
       }
     }
 
+    this.assertSameBusiness(businessId);
     const res = await apiPush(body);
+    this.assertSameBusiness(businessId);
     let pushed = 0;
     for (const key of Object.keys(sentIds) as (keyof PushBody)[]) {
       const results = (res[key] ?? []) as { status: string; detail?: string | null }[];
@@ -163,7 +174,7 @@ class SyncEngine {
     return pushed;
   }
 
-  private async doPull(): Promise<number> {
+  private async doPull(businessId: string): Promise<number> {
     const res = await apiPull({
       since_sales: getCursor(CURSOR_KEYS.sales),
       since_money_movements: getCursor(CURSOR_KEYS.money_movements),
@@ -172,6 +183,7 @@ class SyncEngine {
       since_customers: getCursor(CURSOR_KEYS.customers),
     });
 
+    this.assertSameBusiness(businessId);
     applyPullEvents({
       sales: res.sales,
       money_movements: res.money_movements,
@@ -192,9 +204,10 @@ class SyncEngine {
   }
 
   // Catalogue depuis GET /products. Un échec ici n'échoue pas le sync complet.
-  private async refreshCatalog(): Promise<number> {
+  private async refreshCatalog(businessId: string): Promise<number> {
     try {
       const products = await listProducts();
+      this.assertSameBusiness(businessId);
       upsertProductsFromServer(products.map((p) => ({
         id: p.id,
         name: p.name,

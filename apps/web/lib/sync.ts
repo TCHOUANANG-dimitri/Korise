@@ -90,14 +90,16 @@ class SyncEngine {
 
   async syncNow(): Promise<void> {
     if (this.syncing || (typeof navigator !== 'undefined' && !navigator.onLine)) return;
-    if (!getSession()) return;
+    const session = getSession();
+    if (!session) return;
+    const businessId = session.business_id;
     this.syncing = true;
     this.state = { phase: 'syncing' };
     this.emitSync();
 
     try {
-      const pushed = await this.pushOutbox();
-      const pulled = await this.doPull();
+      const pushed = await this.pushOutbox(businessId);
+      const pulled = await this.doPull(businessId);
       this.backoffMs = 2_000;
       this.state = { phase: 'ok', lastSyncAt: new Date().toISOString(), pushed, pulled };
       this.emitSync();
@@ -130,7 +132,13 @@ class SyncEngine {
     }, wait);
   }
 
-  private async pushOutbox(): Promise<number> {
+  // Les accès IndexedDB et le jeton suivent la session courante : si le compte change
+  // pendant une synchro, on s'arrête avant de mélanger les données de deux entreprises.
+  private assertSameBusiness(businessId: string): void {
+    if (getSession()?.business_id !== businessId) throw new Error('Compte changé pendant la synchro');
+  }
+
+  private async pushOutbox(businessId: string): Promise<number> {
     const pending = await getPendingOutbox();
     if (pending.length === 0) return 0;
 
@@ -181,7 +189,9 @@ class SyncEngine {
       }
     }
 
+    this.assertSameBusiness(businessId);
     const res = await apiPush(body);
+    this.assertSameBusiness(businessId);
     let pushed = 0;
     for (const key of Object.keys(sentIds) as (keyof PushBody)[]) {
       const results = (res[key] ?? []) as { status: string; detail?: string | null }[];
@@ -200,7 +210,7 @@ class SyncEngine {
     return pushed;
   }
 
-  private async doPull(): Promise<number> {
+  private async doPull(businessId: string): Promise<number> {
     const res = await apiPull({
       since_sales: await getCursor(CURSOR_KEYS.sales),
       since_money_movements: await getCursor(CURSOR_KEYS.money_movements),
@@ -209,6 +219,7 @@ class SyncEngine {
       since_customers: await getCursor(CURSOR_KEYS.customers),
     });
 
+    this.assertSameBusiness(businessId);
     await applyPullEvents({
       sales: res.sales,
       money_movements: res.money_movements,

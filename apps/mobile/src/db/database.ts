@@ -1,14 +1,26 @@
 import * as SQLite from 'expo-sqlite';
 
-export const DB_NAME = 'korah.db';
+import { getSessionSync } from '../auth/session';
 
-let db: SQLite.SQLiteDatabase | null = null;
+// Une base SQLite par entreprise : deux comptes utilisés sur le même téléphone ne
+// doivent jamais voir (ni pousser) les données l'un de l'autre. Les données non
+// synchronisées d'un compte restent dans sa base jusqu'à sa reconnexion.
+const DB_PREFIX = 'korah';
+// Ancienne base unique, partagée par tous les comptes de l'appareil.
+const LEGACY_DB_NAME = 'korah.db';
 
+const dbs = new Map<string, SQLite.SQLiteDatabase>();
+
+// Hors session, on pointe sur une base vide : rien d'un autre compte n'est lisible.
 export function getDb(): SQLite.SQLiteDatabase {
-  if (!db) {
-    db = SQLite.openDatabaseSync(DB_NAME);
+  const name = `${DB_PREFIX}-${getSessionSync()?.business_id ?? 'anonymous'}.db`;
+  let d = dbs.get(name);
+  if (!d) {
+    d = SQLite.openDatabaseSync(name);
+    setupSchema(d);
+    dbs.set(name, d);
   }
-  return db;
+  return d;
 }
 
 const SCHEMA = `
@@ -147,7 +159,11 @@ const ADDED_COLUMNS: [table: string, column: string, type: string][] = [
 ];
 
 export function initDatabase(): void {
-  const d = getDb();
+  dropLegacyDb();
+  getDb();
+}
+
+function setupSchema(d: SQLite.SQLiteDatabase): void {
   d.execSync(SCHEMA);
   for (const [table, column, type] of ADDED_COLUMNS) {
     try {
@@ -157,6 +173,25 @@ export function initDatabase(): void {
     }
   }
   recomputeProductQuantities(d);
+}
+
+// L'ancienne base mélange les comptes : impossible de savoir à qui elle appartient.
+// On la supprime si elle n'a plus rien à envoyer ; sinon on la laisse intacte (jamais
+// lue ni poussée) plutôt que de perdre des opérations.
+function dropLegacyDb(): void {
+  try {
+    const legacy = SQLite.openDatabaseSync(LEGACY_DB_NAME);
+    let pending = 0;
+    try {
+      pending = legacy.getFirstSync<{ n: number }>("SELECT COUNT(*) AS n FROM outbox WHERE status = 'pending'")?.n ?? 0;
+    } catch {
+      /* pas de table outbox : base vide */
+    }
+    legacy.closeSync();
+    if (pending === 0) SQLite.deleteDatabaseSync(LEGACY_DB_NAME);
+  } catch {
+    /* best-effort */
+  }
 }
 
 // Le stock de chaque produit est TOUJOURS recalculé à partir de la base
