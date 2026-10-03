@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -10,6 +12,13 @@ class BusinessOut(BaseModel):
     phone: str | None = None
     email: str | None = None
     logo_data: str | None = None
+    deletion_scheduled_for: datetime | None = None
+
+
+class BusinessDeletionRequest(BaseModel):
+    pin: str
+    export_first: bool = False
+    """True when the owner chose « télécharger l'historique puis supprimer » (kept in the audit)."""
 
 
 class BusinessUpdate(BaseModel):

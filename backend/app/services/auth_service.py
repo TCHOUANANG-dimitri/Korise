@@ -9,6 +9,7 @@ from app.core.security import create_access_token, hash_pin, verify_pin
 from app.models.business import Business
 from app.models.events import AuditLog
 from app.models.user import User, UserRole
+from app.services.account_service import DELETION_PENDING_MESSAGE, purge_due_businesses
 from app.services.billing_service import create_default_subscription
 from app.services.platform_service import record_event, upsert_device
 from app.schemas.auth import (
@@ -45,6 +46,7 @@ def _token_for(user: User, business: Business) -> TokenResponse:
         full_name=user.full_name,
         can_view_purchase_prices=user.can_view_purchase_prices,
         can_view_owner_dashboard=user.can_view_owner_dashboard,
+        deletion_scheduled_for=business.deletion_scheduled_for,
     )
 
 
@@ -161,6 +163,7 @@ def recover_business_code(session: Session, request: RecoverCodeRequest, client=
 
 
 def login(session: Session, request: LoginRequest, client=None) -> TokenResponse:
+    purge_due_businesses(session)
     business = session.exec(
         select(Business).where(Business.business_code == request.business_code.upper())
     ).first()
@@ -174,6 +177,8 @@ def login(session: Session, request: LoginRequest, client=None) -> TokenResponse
         if verify_pin(request.pin, user.pin_hash):
             if business.is_suspended:
                 raise HTTPException(status.HTTP_403_FORBIDDEN, "Compte suspendu — contactez le support Korise")
+            if business.deletion_scheduled_for is not None and user.role != UserRole.owner:
+                raise HTTPException(status.HTTP_403_FORBIDDEN, DELETION_PENDING_MESSAGE)
             record_event(
                 session,
                 "user.login",
@@ -240,7 +245,8 @@ def update_employee(
     « owner » supplémentaire ni rétrograder le propriétaire.
     """
     user = session.get(User, user_id)
-    if user is None or user.business_id != business_id:
+    # Un employé supprimé ne se réactive jamais (account_service.delete_employee).
+    if user is None or user.business_id != business_id or user.deleted_at is not None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Employé introuvable")
     if user.role == UserRole.owner:
         # Le patron ne peut pas se modifier via ce canal employés : il n'est

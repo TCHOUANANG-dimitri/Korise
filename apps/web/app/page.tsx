@@ -96,7 +96,7 @@ export default function HomePage() {
           Est-ce que l&rsquo;argent et le stock correspondent à ce qu&rsquo;il devrait y avoir ?
         </p>
         {offline && (
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-warning">
+          <p className="mt-2 flex items-center gap-1.5 text-xs text-accent">
             <AlertTriangle size={14} /> Hors-ligne — vue calculée localement, en attente de synchronisation.
           </p>
         )}
@@ -166,8 +166,8 @@ export default function HomePage() {
               ? remote.stock_alerts.map((a) => ({ id: a.product_id, name: a.name, quantity: a.quantity, minimum_stock: a.minimum_stock }))
               : local!.products.filter((p) => p.quantity <= p.minimum_stock)
             ).map((p) => (
-              <div key={p.id} className="flex items-center gap-2 rounded-field border border-warning/30 bg-warning/5 px-3 py-2 text-sm">
-                <AlertTriangle size={16} className="shrink-0 text-warning" />
+              <div key={p.id} className="flex items-center gap-2 rounded-field border border-accent/30 bg-accent/5 px-3 py-2 text-sm">
+                <AlertTriangle size={16} className="shrink-0 text-accent" />
                 <span>
                   <strong>{p.name}</strong> — plus que {p.quantity} en stock (seuil : {p.minimum_stock})
                 </span>

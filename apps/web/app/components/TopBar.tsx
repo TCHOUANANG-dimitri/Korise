@@ -51,7 +51,7 @@ function SyncStatus() {
 
   if (!online) {
     return (
-      <span className="flex items-center gap-1.5 text-xs font-semibold text-warning">
+      <span className="flex items-center gap-1.5 text-xs font-semibold text-accent">
         <CloudOff size={16} strokeWidth={2} />
         <span className="hidden sm:inline">Hors ligne</span>
         {queue}

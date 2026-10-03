@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Copy, Crown, FileText, RefreshCw, Settings2, UserPlus, UserX, Users } from 'lucide-react';
+import { Check, CheckCircle2, Copy, Crown, FileText, RefreshCw, Settings2, Trash2, UserPlus, Users } from 'lucide-react';
 
 import { useData } from '../../lib/useData';
-import { createEmployee, listEmployees, openPdf, updateEmployee, EmployeeApi } from '../../lib/api';
+import { createEmployee, deleteEmployee, listEmployees, openPdf, updateEmployee, EmployeeApi } from '../../lib/api';
 import { getSession } from '../../lib/session';
 
 const PIN_MIN = 4;
@@ -34,13 +34,22 @@ export default function TeamPage() {
     }
   };
 
-  const deactivate = async (e: EmployeeApi) => {
-    if (!window.confirm(`Désactiver le compte de ${e.full_name} ? Il ne pourra plus se connecter.`)) return;
+  // Suppression définitive du compte : l'employé ne peut plus se connecter, mais ses ventes,
+  // mouvements et shifts restent dans l'historique (rapports, clôtures, journal).
+  const remove = async (e: EmployeeApi) => {
+    if (
+      !window.confirm(
+        `Supprimer définitivement le compte de ${e.full_name} ?\n\nIl ne pourra plus se connecter. Ses ventes et opérations restent dans l’historique.`,
+      )
+    )
+      return;
     setSavingId(e.id);
     try {
-      await updateEmployee(e.id, { is_active: false });
-      setActionFlash(`${e.full_name} désactivé(e).`);
+      await deleteEmployee(e.id);
+      setActionFlash(`Compte de ${e.full_name} supprimé — son historique est conservé.`);
       window.setTimeout(() => setActionFlash(null), 4000);
+    } catch {
+      setActionFlash('Suppression impossible (connexion requise).');
     } finally {
       setSavingId(null);
       setEditingId(null);
@@ -110,7 +119,7 @@ export default function TeamPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    {isOwnerUser ? <Crown size={16} className="text-warning" /> : <Users size={16} className="text-text-muted" />}
+                    {isOwnerUser ? <Crown size={16} className="text-accent" /> : <Users size={16} className="text-text-muted" />}
                     <strong className="truncate">{e.full_name}</strong>
                     <span className={`badge ${isOwnerUser ? 'badge-primary' : 'badge'}`}>
                       {isOwnerUser ? 'propriétaire' : 'employé'}
@@ -190,10 +199,10 @@ export default function TeamPage() {
                     <button
                       type="button"
                       className="btn-secondary !px-3 !py-1.5 text-sm text-danger"
-                      disabled={saving || !e.is_active}
-                      onClick={() => void deactivate(e)}
+                      disabled={saving}
+                      onClick={() => void remove(e)}
                     >
-                      <UserX size={15} /> Désactiver le compte
+                      <Trash2 size={15} /> Supprimer le compte
                     </button>
                   </div>
                 </div>

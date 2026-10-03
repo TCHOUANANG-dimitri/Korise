@@ -3,8 +3,13 @@
 > Digitalisation du document `BizFlow_Identite_Visuelle_Design_System.pdf` fourni par le fondateur,
 > avec les décisions d'implémentation nécessaires pour que le web (Claude Code) et le mobile
 > (OpenCode) produisent des interfaces identiques dans l'esprit, sans avoir à se resynchroniser à
-> chaque écran. **Contraignant pour les deux agents.** Le PDF original et le logo source restent
-> dans `documentation/` comme référence visuelle ultime en cas de doute.
+> chaque écran. **Contraignant pour les deux agents.**
+>
+> **Identité Korise (2026-09-23)** : l'ancienne palette BizFlow (or / indigo) et les polices
+> Manrope / Inter sont **abandonnées**. L'identité actuelle est **orange sur noir**, avec
+> **Signika + Urbanist** (voir `CAHIER_DES_CHARGES.md` §7). La source de vérité machine reste
+> `packages/shared/design-tokens.json`. Le PDF BizFlow ne sert plus de référence pour les couleurs,
+> la typographie ni le logo.
 
 ## Règle absolue
 
@@ -32,10 +37,11 @@ resauvegarde personnelle du PNG du dossier `documentation/`) :
   favicon, icône d'app, petits formats, barre de navigation.
 
 Règles d'usage (reprises du PDF, ne pas y déroger) :
-- Toujours sur fond noir, blanc, ou indigo profond (`#1737A6`) — jamais sur un fond de couleur
-  aléatoire ou une image chargée.
+- Toujours sur fond noir ou blanc — jamais sur un fond de couleur aléatoire ou une image chargée.
 - Garder une zone de respiration autour du logo (au moins un espacement `24px`/`32px`, voir §3).
-- Ne jamais étirer, biseauter, ajouter une ombre forte, ou recolorer le dégradé or.
+- Ne jamais étirer, biseauter, ajouter une ombre forte, ou recolorer le logo (carré orange,
+  pictogramme blanc).
+- `korise-icon-white.png` — variante blanche de l'icône, pour les petits formats sur fond noir.
 - Le PNG fourni est une image raster (pas de vecteur source disponible). Si un jour un export SVG
   vectoriel arrive du fondateur, il remplace ces fichiers sans changer les noms — pas de refonte de
   code nécessaire côté web/mobile.
@@ -48,21 +54,21 @@ mobile).
 
 | Token | Hex | Usage |
 |---|---|---|
-| `background` | `#0B0B0D` | Fond noir premium (écrans sombres, sidebar, headers) |
+| `background` | `#000000` | Fond noir (écrans sombres, sidebar, headers) |
 | `surface` | `#FFFFFF` | Surfaces claires, cartes, fond principal des écrans de gestion |
 | `text` | `#1F2937` | Texte principal sur fond clair |
 | `textMuted` | `#6B7280` | Texte secondaire, labels discrets |
-| `accent` | `#D4A017` | Or — action importante, validation, réconciliation. **Pas de décoration.** |
-| `accentLight` | `#F5C95A` | Or clair — accent lumineux, hover/état actif sur fond sombre |
-| `primary` | `#1737A6` | Indigo — navigation, boutons primaires sur fond clair |
+| `accent` | `#F85602` | Orange — action importante, validation, réconciliation. **Pas de décoration.** |
+| `accentLight` | `#FEBFA0` | Orange clair — hover/état actif sur fond sombre |
+| `primary` | `#000000` | Noir — navigation, boutons principaux sur fond clair (la charte ne fournit qu'orange + noir, `primary` fusionne donc avec `background`) |
 | `focus` | `#2563EB` | Bleu électrique — liens, anneaux de focus clavier |
 | `success` | `#16A34A` | Statut positif (réconcilié, synchronisé) |
-| `warning` | `#D97706` | Statut à vérifier / alerte stock — **volontairement distinct de `accent`** pour ne pas confondre "action dorée" et "avertissement" |
+| `warning` | `#FDF770` | Jaune (texte sombre dessus) — statut à vérifier / alerte stock. **Volontairement distinct de `accent`** pour ne pas confondre « action orange » et « avertissement » |
 | `danger` | `#DC2626` | Écart, erreur, action destructive |
 | `border` | `#E4E7EC` | Bordures 1px sur surfaces claires |
 
-Règle du PDF à respecter strictement : **l'or (`accent`) guide une action, il ne décore jamais.**
-Si un écran a besoin de plus d'un élément doré visible en même temps hors bouton principal, c'est
+Règle à respecter strictement : **l'orange (`accent`) guide une action, il ne décore jamais.**
+Si un écran a besoin de plus d'un élément orange visible en même temps hors bouton principal, c'est
 probablement un signe que la hiérarchie de l'écran est à revoir.
 
 Note d'implémentation : les couleurs `success`/`warning`/`danger` ne figuraient pas en hex précis
@@ -73,17 +79,16 @@ cas par cas dans chaque app.
 
 ## 3. Typographie, espacement, rayons, bordures
 
-**Substitution assumée** : le PDF recommande Aptos (police propriétaire Microsoft, peu praticable
-en cross-platform web + mobile) avec Manrope/Inter comme alternatives déjà citées. Décision : on
-standardise uniquement sur **Manrope + Inter** (Google Fonts, gratuites, disponibles nativement sur
-web comme sur React Native) — jamais Aptos, pour que web et mobile rendent exactement pareil.
+Polices : **Signika + Urbanist** (Google Fonts, gratuites) — `next/font/google` sur le web,
+`@expo-google-fonts` sur le mobile, pour que les deux rendent exactement pareil. Plus de Manrope,
+d'Inter ni d'Aptos.
 
 | Rôle | Police | Graisse |
 |---|---|---|
-| Titres | Manrope | ExtraBold (800) |
-| Chiffres KPI | Manrope | Bold (700) |
-| Corps de texte | Inter | Regular (400) |
-| Micro-labels | Inter | Medium (500), majuscules, `letter-spacing` léger |
+| Titres | Signika | Bold (700 — graisse maximale disponible sur Google Fonts) |
+| Chiffres KPI | Signika | Bold (700) |
+| Corps de texte | Urbanist | Regular (400) |
+| Micro-labels | Urbanist | Medium (500), majuscules, `letter-spacing` léger (`0.04em`) |
 
 - Espacement : échelle stricte **4 / 8 / 12 / 16 / 24 / 32 px** — pas de valeur en dehors de cette
   échelle.
@@ -96,13 +101,13 @@ web comme sur React Native) — jamais Aptos, pour que web et mobile rendent exa
 
 - **Boutons** : trois variantes seulement.
   - *Principale* : fond noir (`background`), texte blanc — action stable/par défaut.
-  - *Accent* : fond `accent` (or), texte noir — validation, action importante (ex. valider une
+  - *Accent* : fond `accent` (orange), texte noir — validation, action importante (ex. valider une
     clôture). Une seule action accent visible par écran, jamais plusieurs en même temps.
   - *Secondaire* : fond blanc, bordure `border`, texte `text` — action secondaire sur surface claire.
 - **Champs de formulaire** : rayon `field` (8px), bordure `border`, label en micro-label au-dessus
   (jamais de placeholder-only, l'utilisateur doit toujours voir ce qu'il remplit).
 - **Badges de statut** (texte + couleur, jamais la couleur seule — accessibilité) :
-  - `ENREGISTRÉ` → `primary` (indigo)
+  - `ENREGISTRÉ` → `primary` (noir)
   - `À VÉRIFIER` → `warning`
   - `ÉCART` → `danger`
   - `RÉCONCILIÉ` → `success`
@@ -148,7 +153,7 @@ vite.** Une vente ne s'entre qu'une fois — jamais de double saisie (voir
 | Faire | Ne pas faire |
 |---|---|
 | Montrer l'essentiel en premier | Afficher 20 indicateurs au même niveau |
-| Utiliser l'or pour guider une action | Mettre de l'or partout |
+| Utiliser l'orange pour guider une action | Mettre de l'orange partout |
 | Mots concrets : Vente, Cash, Stock, Écart | Jargon comptable ou technique inutile |
 | Confirmer clairement les actions sensibles | Masquer une modification importante |
 | Associer chaque action importante à un utilisateur et une date | Laisser une opération sans trace |

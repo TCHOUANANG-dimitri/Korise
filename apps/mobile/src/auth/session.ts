@@ -18,6 +18,9 @@ export interface Session {
   full_name: string;
   can_view_purchase_prices: boolean;
   can_view_owner_dashboard: boolean;
+  // Renseigné quand le propriétaire a demandé la suppression de l'entreprise (ISO, UTC) :
+  // l'app n'affiche plus que l'écran « suppression en cours ».
+  deletion_scheduled_for?: string | null;
 }
 
 // Token mis en cache en mémoire pour éviter une lecture SecureStore par appel API.

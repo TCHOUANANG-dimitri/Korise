@@ -426,6 +426,86 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Delete Employee Route",
+        "description": "Supprimer un employé : connexion fermée définitivement, historique conservé.",
+        "operationId": "delete_employee_route_auth_employees__user_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/verify-pin": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Verify Pin Route",
+        "description": "Re-vérifie le PIN de l'utilisateur connecté avant une action irréversible.",
+        "operationId": "verify_pin_route_auth_verify_pin_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyPinRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/products": {
@@ -2561,6 +2641,125 @@
         ]
       }
     },
+    "/business/me/deletion": {
+      "post": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Request Deletion",
+        "description": "PIN re-vérifié, puis suppression programmée dans 7 jours (annulable jusque-là).",
+        "operationId": "request_deletion_business_me_deletion_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessDeletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Cancel Deletion",
+        "operationId": "cancel_deletion_business_me_deletion_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/business/export.pdf": {
+      "get": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Export Pdf",
+        "operationId": "export_pdf_business_export_pdf_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/business/export.xlsx": {
+      "get": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Export Xlsx",
+        "operationId": "export_xlsx_business_export_xlsx_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/reports/summary": {
       "get": {
         "tags": [
@@ -4109,6 +4308,24 @@
         ],
         "title": "BillingOut"
       },
+      "BusinessDeletionRequest": {
+        "properties": {
+          "pin": {
+            "type": "string",
+            "title": "Pin"
+          },
+          "export_first": {
+            "type": "boolean",
+            "title": "Export First",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "pin"
+        ],
+        "title": "BusinessDeletionRequest"
+      },
       "BusinessDetailOut": {
         "properties": {
           "id": {
@@ -4540,6 +4757,18 @@
             "title": "Is Suspended",
             "default": false
           },
+          "deletion_scheduled_for": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deletion Scheduled For"
+          },
           "last_activity_at": {
             "anyOf": [
               {
@@ -4682,6 +4911,18 @@
               }
             ],
             "title": "Logo Data"
+          },
+          "deletion_scheduled_for": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deletion Scheduled For"
           }
         },
         "type": "object",
@@ -7378,6 +7619,18 @@
           "can_view_owner_dashboard": {
             "type": "boolean",
             "title": "Can View Owner Dashboard"
+          },
+          "deletion_scheduled_for": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deletion Scheduled For"
           }
         },
         "type": "object",
@@ -7559,6 +7812,19 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerifyPinRequest": {
+        "properties": {
+          "pin": {
+            "type": "string",
+            "title": "Pin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pin"
+        ],
+        "title": "VerifyPinRequest"
       }
     },
     "securitySchemes": {

@@ -35,6 +35,7 @@ import { ReportsScreen } from './src/screens/ReportsScreen';
 import { TeamScreen } from './src/screens/TeamScreen';
 import { JournalScreen } from './src/screens/JournalScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { DeletionPendingScreen } from './src/screens/DeletionPendingScreen';
 import { IdleLock } from './src/components/IdleLock';
 import { TopBar } from './src/components/Navigation';
 import { palette, RADIUS, SPACING, typo } from './src/theme';
@@ -79,7 +80,7 @@ export default function App() {
 }
 
 function Root() {
-  const { status, ready } = useApp();
+  const { status, ready, session } = useApp();
 
   if (!ready || status === 'loading') {
     return (
@@ -90,6 +91,7 @@ function Root() {
   }
 
   if (status === 'loggedOut') return <AuthScreen />;
+  if (session?.deletion_scheduled_for) return <DeletionPendingScreen />;
   return (
     <IdleLock>
       <Shell />

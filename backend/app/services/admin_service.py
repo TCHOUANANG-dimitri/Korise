@@ -380,6 +380,7 @@ def list_businesses(session: Session) -> list[BusinessListItemOut]:
                 subscription_status=sub.status.value if sub else None,
                 subscription_ends_at=(sub.current_period_ends_at or sub.trial_ends_at) if sub else None,
                 is_suspended=b.is_suspended,
+                deletion_scheduled_for=b.deletion_scheduled_for,
                 last_activity_at=la,
                 sales_7d=int(sales7.get(b.id, 0)),
                 last_sync_at=dev.get("last_sync"),

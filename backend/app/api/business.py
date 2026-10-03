@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session
 
 from app.api.deps import CurrentUser, get_current_user, require_owner
 from app.db.session import get_session
 from app.models.business import Business
 from app.models.events import AuditLog
-from app.schemas.business import BusinessOut, BusinessUpdate
+from app.schemas.business import BusinessDeletionRequest, BusinessOut, BusinessUpdate
+from app.services import export_service, pdf_service
+from app.services.account_service import cancel_business_deletion, schedule_business_deletion
 
 router = APIRouter(prefix="/business", tags=["business"])
 
@@ -22,6 +24,7 @@ def _out(b: Business) -> BusinessOut:
         phone=b.phone,
         email=b.email,
         logo_data=b.logo_data,
+        deletion_scheduled_for=b.deletion_scheduled_for,
     )
 
 
@@ -65,3 +68,50 @@ def update_me(
     session.commit()
     session.refresh(business)
     return _out(business)
+
+
+# ------------------------------------------------ suppression du compte (propriétaire)
+
+
+@router.post("/me/deletion", response_model=BusinessOut)
+def request_deletion(
+    body: BusinessDeletionRequest,
+    current_user: CurrentUser = Depends(require_owner),
+    session: Session = Depends(get_session),
+):
+    """PIN re-vérifié, puis suppression programmée dans 7 jours (annulable jusque-là)."""
+    return _out(schedule_business_deletion(session, current_user.business_id, current_user.id, body.pin, body.export_first))
+
+
+@router.delete("/me/deletion", response_model=BusinessOut)
+def cancel_deletion(
+    current_user: CurrentUser = Depends(require_owner),
+    session: Session = Depends(get_session),
+):
+    return _out(cancel_business_deletion(session, current_user.business_id, current_user.id))
+
+
+@router.get("/export.pdf")
+def export_pdf(
+    current_user: CurrentUser = Depends(require_owner),
+    session: Session = Depends(get_session),
+):
+    history = export_service.collect(session, current_user.business_id)
+    return Response(
+        content=pdf_service.history_pdf(history),
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="historique-korise.pdf"'},
+    )
+
+
+@router.get("/export.xlsx")
+def export_xlsx(
+    current_user: CurrentUser = Depends(require_owner),
+    session: Session = Depends(get_session),
+):
+    history = export_service.collect(session, current_user.business_id)
+    return Response(
+        content=export_service.history_xlsx(history),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="historique-korise.xlsx"'},
+    )

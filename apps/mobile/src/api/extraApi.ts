@@ -77,6 +77,10 @@ export const updateEmployee = (
   id: string,
   patch: { can_view_purchase_prices?: boolean; can_view_owner_dashboard?: boolean; is_active?: boolean },
 ) => apiFetch<EmployeeApi>(`/auth/employees/${id}`, { method: 'PATCH', body: patch });
+// Suppression définitive : connexion fermée, historique de l'employé conservé.
+export const deleteEmployee = (id: string) => apiFetch<void>(`/auth/employees/${id}`, { method: 'DELETE' });
+// Re-vérifie le PIN de l'utilisateur connecté avant une action irréversible (rejet : ApiError 403).
+export const verifyPin = (pin: string) => apiFetch<void>('/auth/verify-pin', { method: 'POST', body: { pin } });
 
 // ----- Shifts (historique serveur)
 
@@ -105,11 +109,18 @@ export interface BusinessSettingsApi {
   phone: string | null;
   email: string | null;
   logo_data: string | null;
+  deletion_scheduled_for?: string | null;
 }
 
 export const fetchBusinessSettings = () => apiFetch<BusinessSettingsApi>('/business/me');
 export const updateBusinessSettings = (patch: Partial<Omit<BusinessSettingsApi, 'id' | 'business_code' | 'logo_data'>>) =>
   apiFetch<BusinessSettingsApi>('/business/me', { method: 'PATCH', body: patch });
+
+// ----- Suppression du compte entreprise (propriétaire) : effective 7 jours plus tard, annulable.
+
+export const scheduleBusinessDeletion = (pin: string, exportFirst: boolean) =>
+  apiFetch<BusinessSettingsApi>('/business/me/deletion', { method: 'POST', body: { pin, export_first: exportFirst } });
+export const cancelBusinessDeletion = () => apiFetch<BusinessSettingsApi>('/business/me/deletion', { method: 'DELETE' });
 
 // ----- Journal d'audit (propriétaire)
 

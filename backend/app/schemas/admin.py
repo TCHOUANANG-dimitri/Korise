@@ -48,6 +48,7 @@ class BusinessListItemOut(BaseModel):
     subscription_status: str | None
     subscription_ends_at: datetime | None = None
     is_suspended: bool = False
+    deletion_scheduled_for: datetime | None = None
     last_activity_at: datetime | None = None
     sales_7d: int = 0
     last_sync_at: datetime | None = None

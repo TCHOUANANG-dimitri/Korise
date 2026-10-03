@@ -80,6 +80,8 @@ export interface BusinessListItem {
   subscription_status: string | null;
   subscription_ends_at: string | null;
   is_suspended: boolean;
+  // Le propriétaire a demandé la suppression : tout est effacé à cette date (UTC).
+  deletion_scheduled_for: string | null;
   last_activity_at: string | null;
   sales_7d: number;
   last_sync_at: string | null;

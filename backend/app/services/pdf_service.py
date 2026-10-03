@@ -309,3 +309,72 @@ def anomalies_report_pdf(business: Business, anomalies: list) -> bytes:
             ])
         story.append(_table(rows, [24 * mm, None, 28 * mm, 30 * mm, 20 * mm], right_cols=(2,)))
     return _build(business, story)
+
+
+# ---------------------------------------------------------------- full history (account deletion)
+
+
+def history_pdf(history) -> bytes:
+    """Readable summary of the whole history, offered before the owner deletes the account.
+    `history` is an export_service.History; line-by-line detail lives in the Excel export."""
+    business = history.business
+    dates = [s.created_at for s in history.sales] + [m.created_at for m in history.money]
+    period = f"Du {_dt(min(dates))} au {_dt(max(dates))}" if dates else "Aucune opération enregistrée"
+    story = _header(business, "Historique complet", period)
+
+    sales_total = sum(s.total_amount for s in history.sales)
+    expenses = sum(-m.amount for m in history.money if m.type.value in ("expense", "withdrawal"))
+    owed = sum(v for v in history.balances.values() if v > 0)
+    story.append(_kpis([("Ventes", fcfa(sales_total)), ("Nb ventes", str(len(history.sales))),
+                        ("Dépenses et retraits", fcfa(expenses)), ("Crédits dus", fcfa(owed))]))
+    story.append(Paragraph("Le détail ligne par ligne (ventes, argent, stock, shifts, clients) est dans le fichier Excel.", SMALL))
+
+    months: dict[str, dict[str, int]] = {}
+    for s in history.sales:
+        m = months.setdefault(s.created_at.strftime("%Y-%m"), {"sales": 0, "count": 0, "income": 0, "expense": 0, "withdrawal": 0, "credit_repayment": 0})
+        m["sales"] += s.total_amount
+        m["count"] += 1
+    for mv in history.money:
+        if mv.type.value == "sale":
+            continue
+        m = months.setdefault(mv.created_at.strftime("%Y-%m"), {"sales": 0, "count": 0, "income": 0, "expense": 0, "withdrawal": 0, "credit_repayment": 0})
+        m[mv.type.value] += mv.amount
+    story.append(Paragraph("Activité par mois", H2))
+    if months:
+        rows = [["Mois", "Ventes", "Nb", "Entrées", "Dépenses", "Retraits", "Remb. crédit"]]
+        for key in sorted(months):
+            m = months[key]
+            rows.append([key, fcfa(m["sales"]), str(m["count"]), fcfa(m["income"]), fcfa(m["expense"]), fcfa(m["withdrawal"]), fcfa(m["credit_repayment"])])
+        story.append(_table(rows, right_cols=(1, 2, 3, 4, 5, 6)))
+    else:
+        story.append(Paragraph("Aucune activité.", SMALL))
+
+    story.append(Paragraph("Clôtures de journée", H2))
+    if history.closings:
+        rows = [["Jour", "Écart espèces", "Écart MoMo", "Écart Orange", "Par"]]
+        for c in history.closings:
+            rows.append([_dt(c.closing_date), fcfa(c.difference), fcfa(c.difference_momo), fcfa(c.difference_orange), _esc(history.user_name(c.user_id))])
+        story.append(_table(rows, right_cols=(1, 2, 3)))
+    else:
+        story.append(Paragraph("Aucune clôture.", SMALL))
+
+    story.append(Paragraph("Équipe", H2))
+    rows = [["Nom", "Rôle", "Statut", "Nb ventes"]]
+    sales_by_user: dict = {}
+    for s in history.sales:
+        sales_by_user[s.user_id] = sales_by_user.get(s.user_id, 0) + 1
+    for u in history.users.values():
+        status = "Supprimé" if u.deleted_at else ("Actif" if u.is_active else "Désactivé")
+        rows.append([_esc(u.full_name), "Propriétaire" if u.role.value == "owner" else "Employé", status, str(sales_by_user.get(u.id, 0))])
+    story.append(_table(rows, right_cols=(3,)))
+
+    story.append(Paragraph("Stock au moment de l'export", H2))
+    stockable = [p for p in history.products if p.is_stockable and p.is_active]
+    if stockable:
+        rows = [["Produit", "Stock", "Seuil", "Prix de vente"]]
+        for p in stockable:
+            rows.append([_esc(p.name), str(p.quantity), str(p.minimum_stock), fcfa(p.selling_price)])
+        story.append(_table(rows, right_cols=(1, 2, 3)))
+    else:
+        story.append(Paragraph("Aucun produit en stock.", SMALL))
+    return _build(business, story)

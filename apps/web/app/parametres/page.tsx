@@ -7,6 +7,7 @@ import { fetchBusinessSettings, updateBusinessSettings, BusinessSettingsApi } fr
 import { getSession } from '../../lib/session';
 import { APP_VERSION, getDeviceKey, getPlatform } from '../../lib/telemetry';
 import { getLockMinutes, setLockMinutes } from '../../lib/lock';
+import DeleteAccountCard from '../components/DeleteAccountCard';
 
 // Réduit le logo côté navigateur (≤ 256 px, PNG) avant envoi : le serveur le range dans la
 // fiche entreprise et l'utilise dans les PDF (reçus, factures, rapports).
@@ -169,6 +170,8 @@ export default function SettingsPage() {
           <Info label="Identifiant appareil" value={getDeviceKey().slice(-8)} />
         </dl>
       </div>
+
+      {isOwner && <DeleteAccountCard />}
     </>
   );
 }

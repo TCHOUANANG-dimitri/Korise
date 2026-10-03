@@ -9,7 +9,9 @@ import { API_BASE_URL } from './config';
 import { getToken } from './auth/session';
 import { clientHeaders } from './api/telemetryApi';
 
-export async function sharePdf(path: string, filename: string): Promise<void> {
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+async function shareFile(path: string, filename: string, mimeType: string, UTI: string): Promise<void> {
   const token = getToken();
   if (!token) throw new Error('Non connecté');
   const target = `${FileSystem.cacheDirectory}${filename}`;
@@ -17,7 +19,19 @@ export async function sharePdf(path: string, filename: string): Promise<void> {
     headers: { Authorization: `Bearer ${token}`, ...clientHeaders() },
   });
   if (res.status === 404) throw new Error('PDF disponible dès que la vente est synchronisée (connexion requise).');
-  if (res.status >= 400) throw new Error(`PDF indisponible (erreur ${res.status}).`);
+  if (res.status >= 400) throw new Error(`Fichier indisponible (erreur ${res.status}).`);
   if (!(await Sharing.isAvailableAsync())) throw new Error('Le partage de fichiers est indisponible sur cet appareil.');
-  await Sharing.shareAsync(res.uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: filename });
+  await Sharing.shareAsync(res.uri, { mimeType, UTI, dialogTitle: filename });
+}
+
+export function sharePdf(path: string, filename: string): Promise<void> {
+  return shareFile(path, filename, 'application/pdf', 'com.adobe.pdf');
+}
+
+// Historique complet de l'entreprise (propriétaire), proposé avant la suppression du compte.
+export function shareHistory(kind: 'pdf' | 'xlsx'): Promise<void> {
+  const filename = `historique-korise.${kind}`;
+  return kind === 'pdf'
+    ? sharePdf('/business/export.pdf', filename)
+    : shareFile('/business/export.xlsx', filename, XLSX_MIME, 'org.openxmlformats.spreadsheetml.sheet');
 }

@@ -28,10 +28,11 @@ Stack : Expo SDK 57 (React Native) + TypeScript, SQLite (`expo-sqlite`).
 - Couleurs/rayons/espacements : **lus depuis `packages/shared/design-tokens.json`** via
   `src/theme/tokens.ts` (jamais de hex retranscrit à la main). Metro est configuré pour voir le
   monorepo (`metro.config.js` → `watchFolders`).
-- Polices **Manrope** (titres/KPI) + **Inter** (corps/micro-labels), chargées par `expo-font`.
+- Polices **Signika** (titres/KPI) + **Urbanist** (corps/micro-labels), chargées via
+  `@expo-google-fonts` dans `App.tsx`.
 - Icônes **Lucide** (`lucide-react-native`), importées **par icône** pour ne pas embarquer tout
   le jeu (bundle plus léger).
-- **Zéro emoji** dans l'UI. Boutons : principal (noir), accent (or, une seule action par écran),
+- **Zéro emoji** dans l'UI. Boutons : principal (noir), accent (orange, une seule action par écran),
   secondaire (blanc bordé). Micro-labels en majuscules.
 
 ## Offline-first

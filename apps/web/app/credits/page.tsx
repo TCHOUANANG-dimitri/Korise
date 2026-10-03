@@ -224,8 +224,8 @@ export default function CreditsPage() {
       )}
 
       {source === 'local' && items.length > 0 && (
-        <div className="mb-4 flex items-center gap-2 rounded-field border border-warning/30 bg-warning/5 px-3 py-3 text-sm text-text-muted">
-          <TriangleAlert size={18} className="text-warning" /> Hors-ligne : soldes recalculés localement, à confirmer à la synchro.
+        <div className="mb-4 flex items-center gap-2 rounded-field border border-accent/30 bg-accent/5 px-3 py-3 text-sm text-text-muted">
+          <TriangleAlert size={18} className="text-accent" /> Hors-ligne : soldes recalculés localement, à confirmer à la synchro.
         </div>
       )}
 

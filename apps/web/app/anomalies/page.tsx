@@ -162,7 +162,7 @@ export default function AnomaliesPage() {
                     {a.detail && <p className="mt-1 text-sm text-text-muted">{a.detail}</p>}
                     {a.probable_cause && (
                       <p className="mt-1 flex items-start gap-1.5 text-sm">
-                        <AlertTriangle size={14} className="mt-0.5 shrink-0 text-warning" />
+                        <AlertTriangle size={14} className="mt-0.5 shrink-0 text-accent" />
                         <span>
                           <span className="font-semibold">Cause probable :</span> {a.probable_cause}
                         </span>

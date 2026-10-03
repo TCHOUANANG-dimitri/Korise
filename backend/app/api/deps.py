@@ -8,6 +8,7 @@ from app.core.security import InvalidToken, decode_access_token
 from app.db.session import get_session
 from app.models.business import Business
 from app.models.user import User, UserRole
+from app.services.account_service import DELETION_PENDING_MESSAGE, purge_business, utcnow
 
 bearer_scheme = HTTPBearer()
 
@@ -61,6 +62,13 @@ def get_current_user(
     business = session.get(Business, user.business_id)
     if business is not None and business.is_suspended:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Compte suspendu — contactez le support Korise")
+    if business is not None and business.deletion_scheduled_for is not None:
+        if business.deletion_scheduled_for <= utcnow():
+            purge_business(session, business)
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Compte introuvable ou désactivé")
+        # Pendant le délai de grâce, seul le propriétaire entre (télécharger l'historique, annuler).
+        if user.role != UserRole.owner:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, DELETION_PENDING_MESSAGE)
 
     return CurrentUser(
         id=user.id,

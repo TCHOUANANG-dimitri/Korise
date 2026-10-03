@@ -126,6 +126,7 @@ async function request<T>(path: string, init: RequestInit = {}, auth = true): Pr
     }
     throw new ApiError(`Erreur ${res.status}: ${detail}`, res.status);
   }
+  if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
 }
 
@@ -253,6 +254,16 @@ export async function updateEmployee(
   patch: { can_view_purchase_prices?: boolean; can_view_owner_dashboard?: boolean; is_active?: boolean },
 ): Promise<EmployeeApi> {
   return request<EmployeeApi>(`/auth/employees/${employeeId}`, { method: 'PATCH', body: JSON.stringify(patch) });
+}
+
+// Suppression définitive (propriétaire) : connexion fermée, historique de l'employé conservé.
+export async function deleteEmployee(employeeId: string): Promise<void> {
+  return request<void>(`/auth/employees/${employeeId}`, { method: 'DELETE' });
+}
+
+// Re-vérifie le PIN de l'utilisateur connecté avant une action irréversible (rejet : ApiError 403).
+export async function verifyPin(pin: string): Promise<void> {
+  return request<void>('/auth/verify-pin', { method: 'POST', body: JSON.stringify({ pin }) });
 }
 
 // ===== Clients crédit =====
@@ -478,6 +489,7 @@ export interface BusinessSettingsApi {
   phone: string | null;
   email: string | null;
   logo_data: string | null;
+  deletion_scheduled_for?: string | null;
 }
 
 export async function fetchBusinessSettings(): Promise<BusinessSettingsApi> {
@@ -486,6 +498,38 @@ export async function fetchBusinessSettings(): Promise<BusinessSettingsApi> {
 
 export async function updateBusinessSettings(patch: Partial<Omit<BusinessSettingsApi, 'id' | 'business_code'>>): Promise<BusinessSettingsApi> {
   return request<BusinessSettingsApi>('/business/me', { method: 'PATCH', body: JSON.stringify(patch) });
+}
+
+// ===== Suppression du compte entreprise (propriétaire) =====
+
+// PIN re-vérifié côté serveur ; suppression effective 7 jours plus tard, annulable jusque-là.
+export async function scheduleBusinessDeletion(pin: string, exportFirst: boolean): Promise<BusinessSettingsApi> {
+  return request<BusinessSettingsApi>('/business/me/deletion', {
+    method: 'POST',
+    body: JSON.stringify({ pin, export_first: exportFirst }),
+  });
+}
+
+export async function cancelBusinessDeletion(): Promise<BusinessSettingsApi> {
+  return request<BusinessSettingsApi>('/business/me/deletion', { method: 'DELETE' });
+}
+
+// Télécharge un fichier protégé (Bearer) sous le nom donné — historique PDF / Excel.
+export async function downloadFile(path: string, filename: string): Promise<void> {
+  const session = getSession();
+  if (!session) throw new ApiError('Non connecté', 401);
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    headers: { Authorization: `Bearer ${session.access_token}`, ...clientHeaders() },
+  });
+  if (!res.ok) throw new ApiError(`Téléchargement impossible (erreur ${res.status})`, res.status);
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 // ===== Shifts =====

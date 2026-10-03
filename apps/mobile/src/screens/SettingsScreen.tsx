@@ -8,6 +8,7 @@ import { getLockMinutes, setLockMinutes } from '../lock';
 import { palette, SPACING, typo } from '../theme';
 import { Button, Card, Field, Segmented } from '../components/ui';
 import { BusinessCodeCard, Notice, ScreenHeader, SectionTitle } from '../components/shared';
+import { DeleteAccount } from '../components/DeleteAccount';
 
 const LOCKS = [
   { value: '0', label: 'Jamais' },
@@ -103,6 +104,8 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           <Button title="Se déconnecter" variant="secondary" onPress={() => void logout()} />
         </View>
       </Card>
+
+      {isOwner && <DeleteAccount />}
     </ScrollView>
   );
 }

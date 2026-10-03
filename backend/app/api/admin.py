@@ -38,6 +38,7 @@ from app.schemas.admin import (
     TicketUpdate,
 )
 from app.services import admin_service
+from app.services.account_service import purge_due_businesses
 from app.services.platform_service import record_event
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -104,6 +105,8 @@ def search(q: str, _admin: CurrentSuperAdmin = Depends(ANY_ADMIN), session: Sess
 
 @router.get("/businesses", response_model=list[BusinessListItemOut])
 def businesses(_admin: CurrentSuperAdmin = Depends(ANY_ADMIN), session: Session = Depends(get_session)):
+    # Pas de planificateur sur Vercel : les suppressions arrivées à échéance partent ici aussi.
+    purge_due_businesses(session)
     return admin_service.list_businesses(session)
 
 

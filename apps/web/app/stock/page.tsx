@@ -116,12 +116,12 @@ export default function StockPage() {
         </div>
         <div className="kpi-card">
           <span className="kpi-label">Alertes</span>
-          <div className="kpi-value text-warning">{products.length > 0 ? ((low.length / products.length) * 100).toFixed(0) : 0}%</div>
+          <div className="kpi-value text-accent">{products.length > 0 ? ((low.length / products.length) * 100).toFixed(0) : 0}%</div>
         </div>
       </div>
 
       {low.length > 0 && (
-        <div className="mb-5 flex items-start gap-2 rounded-field border border-warning/30 bg-warning/10 px-3 py-3 text-sm font-medium text-warning">
+        <div className="mb-5 flex items-start gap-2 rounded-field border border-accent/30 bg-accent/10 px-3 py-3 text-sm font-medium text-accent">
           <TriangleAlert size={18} className="mt-0.5 shrink-0" />
           <span>
             {low.length} produit{low.length > 1 ? 's' : ''} sous le seuil minimum — penser à réapprovisionner.

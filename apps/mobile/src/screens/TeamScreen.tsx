@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import { createEmployee } from '../api/authApi';
-import { listEmployees, updateEmployee, EmployeeApi } from '../api/extraApi';
+import { deleteEmployee, listEmployees, updateEmployee, EmployeeApi } from '../api/extraApi';
 import { sharePdf } from '../pdf';
 import { palette, RADIUS, SPACING, typo } from '../theme';
 import { Badge, Button, Card, Field } from '../components/ui';
 import { BusinessCodeCard, EmptyText, Notice, ScreenHeader } from '../components/shared';
 import { PIN_MAX, PIN_MIN } from '../config';
 
-// Équipe (propriétaire) : créer un employé, régler ses permissions, le désactiver, ouvrir son rapport.
+// Équipe (propriétaire) : créer un employé, régler ses permissions, le supprimer, ouvrir son rapport.
 export function TeamScreen({ onBack }: { onBack: () => void }) {
   const { session } = useApp();
   const isOwner = session?.role === 'owner';
@@ -52,7 +52,7 @@ export function TeamScreen({ onBack }: { onBack: () => void }) {
     }
   };
 
-  const patch = async (e: EmployeeApi, p: { can_view_purchase_prices?: boolean; can_view_owner_dashboard?: boolean; is_active?: boolean }) => {
+  const patch = async (e: EmployeeApi, p: { can_view_purchase_prices?: boolean; can_view_owner_dashboard?: boolean }) => {
     try {
       await updateEmployee(e.id, p);
       say(`${e.full_name} mis à jour.`);
@@ -60,6 +60,30 @@ export function TeamScreen({ onBack }: { onBack: () => void }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Action refusée');
     }
+  };
+
+  // Suppression définitive du compte : l'employé ne peut plus se connecter, mais ses ventes,
+  // mouvements et shifts restent dans l'historique (rapports, clôtures, journal).
+  const remove = (e: EmployeeApi) => {
+    Alert.alert(
+      'Supprimer ce compte ?',
+      `${e.full_name} ne pourra plus se connecter. Ses ventes et opérations restent dans l’historique.`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: () => {
+            deleteEmployee(e.id)
+              .then(() => {
+                say(`Compte de ${e.full_name} supprimé — son historique est conservé.`);
+                load();
+              })
+              .catch((err) => setError(err instanceof Error ? err.message : 'Suppression impossible'));
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -117,7 +141,7 @@ export function TeamScreen({ onBack }: { onBack: () => void }) {
                         <Button title="Rapport PDF" variant="secondary" onPress={() => void sharePdf(`/reports/employee.pdf?user_id=${e.id}`, 'rapport-employe.pdf').catch((err) => setError(err.message))} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Button title={e.is_active ? 'Désactiver' : 'Réactiver'} variant="secondary" onPress={() => void patch(e, { is_active: !e.is_active })} />
+                        <Button title="Supprimer" variant="secondary" onPress={() => remove(e)} />
                       </View>
                     </View>
                   </View>

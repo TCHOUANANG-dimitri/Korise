@@ -12,6 +12,9 @@ export interface Session {
   full_name: string;
   can_view_purchase_prices: boolean;
   can_view_owner_dashboard: boolean;
+  // Renseigné quand le propriétaire a demandé la suppression de l'entreprise (ISO, UTC) :
+  // l'app n'affiche plus que l'écran « suppression en cours ».
+  deletion_scheduled_for?: string | null;
 }
 
 const KEY = 'korise_session';

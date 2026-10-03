@@ -138,6 +138,7 @@ export default function EntreprisesPage() {
                       {b.business_code} · inscrite le {fdate(b.created_at)}
                     </span>
                     {b.is_suspended && <Badge tone="bad">Suspendue</Badge>}
+                    {b.deletion_scheduled_for && <Badge tone="bad">Suppression le {fdate(b.deletion_scheduled_for)}</Badge>}
                   </td>
                   {cols.identity && (
                     <td>

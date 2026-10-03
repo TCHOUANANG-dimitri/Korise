@@ -20,4 +20,8 @@ class Business(SQLModel, table=True):
     branded PDFs (receipts, invoices, reports). Kept in the row: no file storage to run."""
     is_suspended: bool = Field(default=False, sa_column_kwargs={"server_default": "false"})
     """Set by a Super Admin. A suspended business cannot log in or sync until reactivated."""
+    deletion_scheduled_for: datetime | None = None
+    """Set when the owner deletes their account (naive UTC). Until then only the owner can
+    log in — to download the history or cancel; at this date everything is erased
+    (services/account_service.purge_due_businesses)."""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -123,7 +123,7 @@ export default function Receipt({ data, onDone }: { data: ReceiptData; onDone?: 
           </button>
         )}
       </div>
-      {pdfError && <p className="mt-2 text-xs font-medium text-warning">{pdfError}</p>}
+      {pdfError && <p className="mt-2 text-xs font-medium text-accent">{pdfError}</p>}
     </div>
   );
 }

@@ -14,6 +14,7 @@ export interface TokenResponse {
   full_name: string;
   can_view_purchase_prices: boolean;
   can_view_owner_dashboard: boolean;
+  deletion_scheduled_for?: string | null;
 }
 
 export interface UserOut {

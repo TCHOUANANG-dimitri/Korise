@@ -54,7 +54,7 @@
     @apply bg-primary/10 text-primary;
   }
   .badge-warning {
-    @apply bg-warning/10 text-warning;
+    @apply bg-accent/10 text-accent;
   }
   .badge-danger {
     @apply bg-danger/10 text-danger;

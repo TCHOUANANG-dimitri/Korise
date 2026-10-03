@@ -10,7 +10,8 @@ import React, {
 import { AppState, AppStateStatus } from 'react-native';
 
 import { SYNC_INTERVAL_MS } from '../config';
-import { Session, persistSession, loadSession, setSessionCache, clearSession as clearStored } from '../auth/session';
+import { Session, getSessionSync, persistSession, loadSession, setSessionCache, clearSession as clearStored } from '../auth/session';
+import { fetchBusinessSettings } from '../api/extraApi';
 import { login as apiLogin, registerBusiness as apiRegister } from '../api/authApi';
 import { initDatabase } from '../db/database';
 import { rememberPin } from '../lock';
@@ -44,6 +45,7 @@ interface AppContextValue {
   }) => Promise<RegisteredBusiness>;
   enterAfterRegister: () => Promise<void>;
   logout: () => Promise<void>;
+  updateSession: (patch: Partial<Session>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -64,6 +66,7 @@ interface TokenResponseLikeWithUser {
   full_name: string;
   can_view_purchase_prices: boolean;
   can_view_owner_dashboard: boolean;
+  deletion_scheduled_for?: string | null;
 }
 
 function buildSession(token: TokenResponseLikeWithUser): Session {
@@ -77,6 +80,7 @@ function buildSession(token: TokenResponseLikeWithUser): Session {
     full_name: token.full_name,
     can_view_purchase_prices: token.can_view_purchase_prices,
     can_view_owner_dashboard: token.can_view_owner_dashboard,
+    deletion_scheduled_for: token.deletion_scheduled_for ?? null,
   };
 }
 
@@ -222,6 +226,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSyncState({ phase: 'idle' });
   }, []);
 
+  const updateSession = useCallback(async (patch: Partial<Session>) => {
+    const current = getSessionSync();
+    if (!current) return;
+    const next = { ...current, ...patch };
+    await persistSession(next);
+    setSession(next);
+  }, []);
+
+  // La suppression a pu être demandée depuis un autre appareil : le propriétaire relit l'état
+  // de l'entreprise à chaque connexion (best-effort, sans effet hors-ligne).
+  useEffect(() => {
+    if (status !== 'loggedIn' || session?.role !== 'owner') return;
+    fetchBusinessSettings()
+      .then((b) => {
+        const scheduled = b.deletion_scheduled_for ?? null;
+        if ((getSessionSync()?.deletion_scheduled_for ?? null) !== scheduled) void updateSession({ deletion_scheduled_for: scheduled });
+      })
+      .catch(() => undefined);
+  }, [status, session?.user_id, session?.role, updateSession]);
+
   const value = useMemo<AppContextValue>(
     () => ({
       status,
@@ -236,8 +260,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       register,
       enterAfterRegister,
       logout,
+      updateSession,
     }),
-    [status, session, ready, refreshKey, refresh, syncNow, syncState, login, register, enterAfterRegister, logout],
+    [status, session, ready, refreshKey, refresh, syncNow, syncState, login, register, enterAfterRegister, logout, updateSession],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

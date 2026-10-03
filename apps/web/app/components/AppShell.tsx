@@ -3,11 +3,13 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { getSession, Session } from '../../lib/session';
+import { fetchBusinessSettings } from '../../lib/api';
+import { getSession, setSession as saveSession, Session } from '../../lib/session';
 import { normalizePathname } from '../../lib/pathname';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import IdleLock from './IdleLock';
+import DeletionPending from './DeletionPending';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = normalizePathname(usePathname());
@@ -25,8 +27,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('korise-session-changed', sync);
   }, []);
 
+  // La suppression a pu être demandée depuis un autre appareil : le propriétaire relit l'état
+  // de l'entreprise au démarrage (best-effort, sans effet hors-ligne).
+  useEffect(() => {
+    const current = getSession();
+    if (current?.role !== 'owner') return;
+    fetchBusinessSettings()
+      .then((b) => {
+        const scheduled = b.deletion_scheduled_for ?? null;
+        const latest = getSession();
+        if (latest && (latest.deletion_scheduled_for ?? null) !== scheduled) saveSession({ ...latest, deletion_scheduled_for: scheduled });
+      })
+      .catch(() => undefined);
+  }, [session?.user_id]);
+
   // Routes publiques (hors shell) : connexion et récupération du code entreprise.
   if (pathname === '/login' || pathname === '/code-oublie') return <>{children}</>;
+  if (session?.deletion_scheduled_for) return <DeletionPending session={session} />;
 
   return (
     <>

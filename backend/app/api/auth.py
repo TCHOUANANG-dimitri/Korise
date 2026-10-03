@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
-from app.api.deps import ClientInfo, CurrentUser, get_client_info, require_owner
+from app.api.deps import ClientInfo, CurrentUser, get_client_info, get_current_user, require_owner
 from app.db.session import get_session
 from app.schemas.auth import (
     CreateEmployeeRequest,
@@ -14,7 +14,9 @@ from app.schemas.auth import (
     TokenResponse,
     UpdateEmployeeRequest,
     UserOut,
+    VerifyPinRequest,
 )
+from app.services.account_service import check_pin, delete_employee
 from app.services.auth_service import (
     create_employee,
     list_users,
@@ -75,6 +77,26 @@ def update_employee_route(
     """Modifier un employé. Le rôle est immuable — un employé ne peut jamais
     devenir owner via cette route, et aucun employé ne peut se modifier lui-même."""
     return update_employee(session, current_user.business_id, current_user.id, user_id, request)
+
+
+@router.delete("/employees/{user_id}", status_code=204)
+def delete_employee_route(
+    user_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_owner),
+    session: Session = Depends(get_session),
+):
+    """Supprimer un employé : connexion fermée définitivement, historique conservé."""
+    delete_employee(session, current_user.business_id, current_user.id, user_id)
+
+
+@router.post("/verify-pin", status_code=204)
+def verify_pin_route(
+    request: VerifyPinRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    """Re-vérifie le PIN de l'utilisateur connecté avant une action irréversible."""
+    check_pin(session, current_user.id, request.pin)
 
 
 @router.get("/employees", response_model=list[UserOut])

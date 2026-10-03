@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -29,6 +30,13 @@ class TokenResponse(BaseModel):
     full_name: str
     can_view_purchase_prices: bool
     can_view_owner_dashboard: bool
+    deletion_scheduled_for: datetime | None = None
+    """Set when the owner has asked to delete the business: the apps then show only the
+    « suppression en cours » screen (download the history, cancel)."""
+
+
+class VerifyPinRequest(BaseModel):
+    pin: str
 
 
 class RecoverCodeRequest(BaseModel):

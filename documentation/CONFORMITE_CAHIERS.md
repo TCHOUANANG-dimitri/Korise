@@ -58,6 +58,7 @@ Légende : ✅ fait et testé · 🟡 fait avec une limite assumée (précisée)
 | Verrouillage automatique après inactivité | ✅ web et mobile, durée réglable (défaut 10 min) — PIN vérifié hors-ligne via empreinte salée, jamais stocké en clair |
 | Changement d'employé rapide | 🟡 verrou → « Changer d'utilisateur » (déconnexion + nouvelle saisie). L'écran « Qui utilisez-vous ? » à cartes de profils (§4.1) n'est pas fait : le fondateur l'a écarté pour le MVP (« pas besoin de tout ça »). |
 | Désactivation immédiate d'un utilisateur | ✅ |
+| Suppression de compte (hors cahier, ajout 2026-09-30) | ✅ employé supprimé par le propriétaire (historique conservé) ; suppression de l'entreprise par le propriétaire : PIN, export PDF / Excel proposé, effacement total après 7 jours, annulable. Web et mobile. |
 | Historique des appareils / sessions | ✅ côté Super Admin (Devices & Versions) |
 | 2FA propriétaire | — écarté pour le MVP par le fondateur |
 | Impossible de supprimer silencieusement une opération | ✅ aucun endpoint de suppression d'événement |

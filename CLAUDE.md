@@ -38,9 +38,9 @@ mis de côté sur instruction du fondateur.
 
 ## Design system — implémentation web/desktop
 
-Référence contraignante : `documentation/DESIGN_SYSTEM.md` (digitalisation du design system
-BizFlow fourni par le fondateur, palette/typo ensuite reprises telles quelles par Koness puis
-Korise — seul le nom du produit a changé) + `packages/shared/design-tokens.json` (tokens
+Référence contraignante : `documentation/DESIGN_SYSTEM.md` (identité Korise : **orange `#F85602`
+sur noir**, polices **Signika + Urbanist** — l'ancienne palette BizFlow or/indigo et Manrope/Inter
+sont abandonnées depuis le rebrand du 2026-09-23) + `packages/shared/design-tokens.json` (tokens
 machine-readable — **importer ce fichier, ne jamais retranscrire un hex à la main**) +
 `packages/shared/brand/` (logo : `korise-logo-full.png` pour connexion/splash, `korise-icon.png`
 pour favicon/petits formats — noms mis à jour lors du rebrand Koness → Korise, 2026-09-23).
@@ -51,9 +51,9 @@ Décisions d'implémentation pour Next.js :
   (`require()` ce fichier dans `tailwind.config.js` plutôt que de dupliquer les couleurs) — une
   seule source de vérité pour les couleurs/rayons/espacements, partagée avec le futur code desktop
   qui réutilise exactement le même build.
-- **Polices** : Manrope (titres, KPI) + Inter (corps, micro-labels) via `next/font/google` — jamais
-  Aptos (substitution assumée et documentée dans DESIGN_SYSTEM.md §3, pour un rendu identique au
-  mobile React Native).
+- **Polices** : Signika (titres, KPI, 700) + Urbanist (corps 400, micro-labels 500) via
+  `next/font/google` — mêmes polices que le mobile React Native (`@expo-google-fonts`) pour un
+  rendu identique (DESIGN_SYSTEM.md §3).
 - **Icônes** : `lucide-react`, style outline, 20-24px. Pas d'autre bibliothèque d'icônes, pas
   d'emoji de secours.
 - **Logo** : composant `<Logo variant="full" | "icon" />` qui sert les PNG de `packages/shared/brand/`
@@ -182,6 +182,26 @@ retirer.
 - `GET /products` (liste et détail) a désormais un `response_model` déclaré
   (`ProductOut | ProductOutRestricted`) — le schéma OpenAPI n'était plus vide.
 - 20/20 tests backend verts après ces correctifs ; `packages/shared/openapi.json` régénéré.
+
+## Suppression de compte (implémentée, 2026-09-30 — décision du fondateur)
+
+- **Employé** : seul le propriétaire le supprime (`DELETE /auth/employees/{id}`, bouton « Supprimer le
+  compte » sur Équipe web + mobile, qui remplace « Désactiver »). Connexion fermée pour toujours
+  (`User.deleted_at`, jamais réactivable via PATCH), téléphone effacé, mais la ligne `User` et **tout
+  son historique restent** (ventes, mouvements, shifts gardent leur auteur).
+- **Propriétaire** = suppression de l'entreprise entière. Paramètres → « Supprimer mon compte » : PIN
+  (`POST /auth/verify-pin`), puis choix « Télécharger l'historique puis supprimer » (PDF résumé
+  `GET /business/export.pdf` + Excel détaillé `GET /business/export.xlsx`, openpyxl) ou « Tout
+  supprimer ». Dans les deux cas : `POST /business/me/deletion` pose `Business.deletion_scheduled_for`
+  = maintenant + 7 jours. Pendant ce délai seuls le propriétaire se connecte (écran unique
+  « Suppression en cours » : télécharger, annuler via `DELETE /business/me/deletion`, se déconnecter) ;
+  les employés reçoivent un 403.
+- **Purge** (`services/account_service.purge_business`, effacement de toutes les tables dans l'ordre des
+  clés étrangères, une transaction) : pas de planificateur sur Vercel, donc elle part paresseusement
+  (chaque `/auth/login`, chaque requête authentifiée de l'entreprise concernée, la liste Super Admin des
+  entreprises) ou à la main (`scripts/purge_deleted_businesses.py`). Seule trace conservée : un
+  `PlatformEvent` anonyme `business.deleted` (nom, code, propriétaire, nb ventes).
+- Tests : `backend/tests/test_account_deletion.py` (4 verts) ; 57/57 au total.
 
 ## Prochaines étapes backend (dette explicite, pas oubliée)
 

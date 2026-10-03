@@ -188,7 +188,7 @@ export default function ClosingPage() {
                 </>
               ) : (
                 <>
-                  <AlertTriangle size={14} className="text-warning" /> Hors-ligne : calcul local temporaire, à réconcilier à la sync.
+                  <AlertTriangle size={14} className="text-accent" /> Hors-ligne : calcul local temporaire, à réconcilier à la sync.
                 </>
               )}
             </p>
