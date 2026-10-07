@@ -24,6 +24,7 @@ from app.models.platform import AdminAuditLog, AdminNote, Device, PlatformEvent,
 from app.models.shift import Shift
 from app.models.user import User, UserRole
 from app.schemas.admin import (
+    AcquisitionRow,
     AdminOverviewOut,
     AlertOut,
     AnalyticsOut,
@@ -606,6 +607,23 @@ def _segment_scope(session: Session, plan_id: uuid.UUID | None, platform: str | 
     return scope
 
 
+def _acquisition(session: Session, since: datetime, scope: set[uuid.UUID] | None) -> list[AcquisitionRow]:
+    """Inscriptions de la période par canal (liens traçables de la landing), avec la part
+    qui a réellement vendu — pour savoir quel réseau amène des clients, pas des curieux."""
+    rows = session.exec(select(Business.id, Business.signup_source).where(Business.created_at >= since)).all()
+    by_source: dict[str, set[uuid.UUID]] = defaultdict(set)
+    for bid, src in rows:
+        if scope is None or bid in scope:
+            by_source[src or "direct"].add(bid)
+    ids = set().union(*by_source.values()) if by_source else set()
+    sold = set(session.exec(select(Sale.business_id).where(Sale.business_id.in_(ids)).distinct()).all()) if ids else set()
+    out = [
+        AcquisitionRow(source=s, signups=len(b), activated=len(b & sold), activation_percent=_pct(len(b & sold), len(b)))
+        for s, b in by_source.items()
+    ]
+    return sorted(out, key=lambda r: -r.signups)
+
+
 def get_analytics(
     session: Session,
     days: int = 30,
@@ -659,6 +677,7 @@ def get_analytics(
         series_active_users=series_users,
         versions=[{"label": k, "count": v} for k, v in sorted(version_counts.items(), key=lambda kv: -kv[1])],
         platforms=[{"label": k, "count": v} for k, v in sorted(platform_counts.items(), key=lambda kv: -kv[1])],
+        acquisition=_acquisition(session, since, scope),
     )
 
 

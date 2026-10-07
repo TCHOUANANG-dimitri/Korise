@@ -24,4 +24,7 @@ class Business(SQLModel, table=True):
     """Set when the owner deletes their account (naive UTC). Until then only the owner can
     log in — to download the history or cancel; at this date everything is erased
     (services/account_service.purge_due_businesses)."""
+    signup_source: str | None = None
+    """Canal d'acquisition à l'inscription (facebook, instagram, tiktok, whatsapp…), transmis
+    par la landing page via ?src= → app web → register-business. NULL = accès direct."""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

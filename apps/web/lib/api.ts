@@ -138,6 +138,7 @@ export async function registerBusiness(input: {
   owner_full_name: string;
   owner_phone?: string;
   pin: string;
+  signup_source?: string;
 }): Promise<Session> {
   return request<Session>('/auth/register-business', { method: 'POST', body: JSON.stringify(input) }, false);
 }

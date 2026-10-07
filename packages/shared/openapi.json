@@ -3360,6 +3360,34 @@
   },
   "components": {
     "schemas": {
+      "AcquisitionRow": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "signups": {
+            "type": "integer",
+            "title": "Signups"
+          },
+          "activated": {
+            "type": "integer",
+            "title": "Activated"
+          },
+          "activation_percent": {
+            "type": "number",
+            "title": "Activation Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "signups",
+          "activated",
+          "activation_percent"
+        ],
+        "title": "AcquisitionRow"
+      },
       "AdminAuditOut": {
         "properties": {
           "id": {
@@ -3998,6 +4026,14 @@
             },
             "type": "array",
             "title": "Platforms"
+          },
+          "acquisition": {
+            "items": {
+              "$ref": "#/components/schemas/AcquisitionRow"
+            },
+            "type": "array",
+            "title": "Acquisition",
+            "default": []
           }
         },
         "type": "object",
@@ -6854,6 +6890,17 @@
             "maxLength": 8,
             "minLength": 4,
             "title": "Pin"
+          },
+          "signup_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signup Source"
           }
         },
         "type": "object",

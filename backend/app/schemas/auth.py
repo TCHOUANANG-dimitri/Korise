@@ -12,6 +12,9 @@ class RegisterBusinessRequest(BaseModel):
     owner_full_name: str
     owner_phone: str | None = None
     pin: str = Field(min_length=4, max_length=8)
+    signup_source: str | None = None
+    """Canal d'acquisition (lien traçable de la landing). Normalisé côté service ; une valeur
+    invalide est ignorée, jamais une raison de refuser l'inscription."""
 
 
 class LoginRequest(BaseModel):

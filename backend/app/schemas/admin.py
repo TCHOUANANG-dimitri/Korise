@@ -239,6 +239,15 @@ class AdminOverviewOut(BaseModel):
     inactive_recently: list[BusinessListItemOut]
 
 
+class AcquisitionRow(BaseModel):
+    source: str
+    """Slug du canal (facebook, instagram, tiktok, whatsapp…) ou « direct »."""
+    signups: int
+    activated: int
+    """Entreprises de ce canal ayant fait au moins une vente — un inscrit qui vend est un vrai client."""
+    activation_percent: float
+
+
 class AnalyticsOut(BaseModel):
     period_days: int
     generated_at: datetime
@@ -256,6 +265,7 @@ class AnalyticsOut(BaseModel):
     series_active_users: list[SeriesPoint]
     versions: list[dict]
     platforms: list[dict]
+    acquisition: list[AcquisitionRow] = []
 
 
 class MonitoringOut(BaseModel):

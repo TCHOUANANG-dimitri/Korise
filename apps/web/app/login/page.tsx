@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Check, Copy, HelpCircle, LogIn, Store } from 'lucide-react';
@@ -8,6 +8,7 @@ import { ArrowRight, Check, Copy, HelpCircle, LogIn, Store } from 'lucide-react'
 import { ApiError, login, registerBusiness } from '../../lib/api';
 import { Session, setSession } from '../../lib/session';
 import { rememberPin } from '../../lib/lock';
+import { captureSignupSource, getSignupSource } from '../../lib/acquisition';
 import Logo from '../components/Logo';
 
 type Mode = 'login' | 'register';
@@ -31,6 +32,13 @@ export default function LoginPage() {
   const [ownerName, setOwnerName] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
   const [newPin, setNewPin] = useState('');
+
+  // Arrivée depuis la landing (« Essayer gratuitement ») : ?mode=register ouvre directement
+  // l'inscription, ?src=<canal> est gardé pour l'attribuer à l'entreprise créée.
+  useEffect(() => {
+    captureSignupSource();
+    if (new URLSearchParams(window.location.search).get('mode') === 'register') setMode('register');
+  }, []);
 
   const afterSuccess = (session: Parameters<typeof setSession>[0]) => {
     setSession(session);
@@ -60,6 +68,7 @@ export default function LoginPage() {
         owner_full_name: ownerName.trim(),
         owner_phone: ownerPhone.trim() || undefined,
         pin: newPin,
+        signup_source: getSignupSource(),
       });
       await rememberPin(session.user_id, newPin);
       setSession(session);

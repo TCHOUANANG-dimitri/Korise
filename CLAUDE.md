@@ -203,6 +203,20 @@ retirer.
   `PlatformEvent` anonyme `business.deleted` (nom, code, propriétaire, nb ventes).
 - Tests : `backend/tests/test_account_deletion.py` (4 verts) ; 57/57 au total.
 
+## Landing page et canal d'acquisition (implémentés, 2026-10-07)
+
+- `apps/landing/` (mon périmètre) : page de prospection en HTML statique unique, objectif unique =
+  clic « Essayer gratuitement » → `<app>/login/?mode=register&src=<canal>`. Couleurs injectées depuis
+  `design-tokens.json` au build (`build.mjs`), logo copié depuis `packages/shared/brand`, réglages dans
+  `config.json` (URL app, WhatsApp, YouTube, réseaux). Voir `apps/landing/README.md`.
+- Liens traçables `/fb` `/ig` `/tt` `/wa` (rewrites `vercel.json`) → `Business.signup_source`
+  (migration `9a3f6c2e1d47`), normalisé côté serveur (slug `[a-z0-9_-]{1,32}`, sinon ignoré — ne bloque
+  jamais l'inscription). Web : `lib/acquisition.ts` + `/login` lit `?mode=register&src=`. Super Admin
+  Analytics : « Inscriptions par canal » (inscrits + part ayant vendu). Tests :
+  `backend/tests/test_signup_source.py`.
+- **Le PNG `korise-logo-full.png` a un fond noir opaque** (pas transparent) : sur fond sombre la landing
+  le rend avec `mix-blend-mode: lighten`. Sur fond clair, il faudrait une version transparente.
+
 ## Prochaines étapes backend (dette explicite, pas oubliée)
 
 - Expiration/refresh du token : le JWT expire après 24h (`jwt_access_token_expire_minutes`) sans

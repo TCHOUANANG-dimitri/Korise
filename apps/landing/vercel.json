@@ -1,0 +1,13 @@
+{
+  "buildCommand": "node build.mjs",
+  "outputDirectory": "dist",
+  "framework": null,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/:canal(fb|facebook|ig|instagram|tt|tiktok|wa|whatsapp)", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/brand/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] },
+    { "source": "/og.png", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] }
+  ]
+}

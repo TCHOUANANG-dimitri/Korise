@@ -272,6 +272,14 @@ export interface Analytics {
   series_active_users: SeriesPoint[];
   versions: { label: string; count: number }[];
   platforms: { label: string; count: number }[];
+  acquisition: AcquisitionRow[];
+}
+
+export interface AcquisitionRow {
+  source: string;
+  signups: number;
+  activated: number;
+  activation_percent: number;
 }
 
 export interface Monitoring {

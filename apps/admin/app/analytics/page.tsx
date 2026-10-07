@@ -9,6 +9,16 @@ import { BarRows, ChartCard, LineChart } from '../../components/charts';
 
 const PERIODS = [7, 30, 90];
 
+// Libellés des liens traçables de la landing page (?src=…) ; tout autre slug s'affiche tel quel.
+const SOURCE_LABELS: Record<string, string> = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  whatsapp: 'WhatsApp',
+  landing: 'Landing (sans canal)',
+  direct: 'Accès direct',
+};
+
 export default function AnalyticsPage() {
   const [days, setDays] = useState(30);
   const [plan, setPlan] = useState('');
@@ -133,6 +143,30 @@ export default function AnalyticsPage() {
               <LineChart data={data.series_new_businesses} />
             </ChartCard>
           </div>
+
+          <Section title="Acquisition" sub="D’où viennent les inscrits (liens traçables de la landing) et combien vendent réellement.">
+            <ChartCard
+              title="Inscriptions par canal"
+              sub="entreprises inscrites sur la période · « clients actifs » = au moins une vente"
+              table={{
+                head: ['Canal', 'Inscrits', 'Clients actifs', '%'],
+                rows: (data.acquisition ?? []).map((a) => [SOURCE_LABELS[a.source] ?? a.source, a.signups, a.activated, `${a.activation_percent} %`]),
+              }}
+            >
+              {(data.acquisition ?? []).length === 0 ? (
+                <p className="text-sm text-text-muted">Aucune inscription sur la période.</p>
+              ) : (
+                <BarRows
+                  rows={data.acquisition.map((a) => ({
+                    label: SOURCE_LABELS[a.source] ?? a.source,
+                    value: a.signups,
+                    display: String(a.signups),
+                    sub: `${a.activated} actifs · ${a.activation_percent} %`,
+                  }))}
+                />
+              )}
+            </ChartCard>
+          </Section>
 
           <Section title="Segmentation appareils" sub="Répartition des appareils connus (mêmes filtres que ci-dessus).">
             <div className="grid gap-4 lg:grid-cols-2">

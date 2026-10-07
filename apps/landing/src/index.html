@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Korise — Caisse et stock sous contrôle, même absent</title>
+<meta name="description" content="Une vente saisie met à jour la caisse et le stock. Le soir, Korise vous dit s'il manque de l'argent. 15 jours d'essai gratuit.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="/brand/korise-icon.png">
+<link rel="apple-touch-icon" href="/brand/korise-icon.png">
+<link rel="canonical" href="%%SITE_URL%%/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Korise">
+<meta property="og:url" content="%%SITE_URL%%/">
+<meta property="og:title" content="Korise — Caisse et stock sous contrôle, même absent">
+<meta property="og:description" content="Il manque 6 000 FCFA ce soir ? Korise vous dit combien, quand et qui. 15 jours gratuits.">
+<meta property="og:image" content="%%SITE_URL%%/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Polices non bloquantes : le texte s'affiche tout de suite (police système), puis bascule. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Signika:wght@700&family=Urbanist:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Signika:wght@700&family=Urbanist:wght@400;500;600&display=swap"></noscript>
+<style>
+/*%%TOKENS%%*/
+:root{
+  --ink:var(--surface);
+  --ink-2:rgba(255,255,255,.72);
+  --ink-3:rgba(255,255,255,.5);
+  --line:rgba(255,255,255,.1);
+  --card:rgba(255,255,255,.04);
+  --glow:color-mix(in srgb,var(--accent) 22%,transparent);
+  --h:'Signika',ui-sans-serif,system-ui,sans-serif;
+  --b:'Urbanist',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --wrap:1120px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--background);color:var(--ink);font:400 16px/1.55 var(--b);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,svg{display:block}
+a{color:inherit}
+h1,h2,h3{font-family:var(--h);font-weight:700;line-height:1.12;margin:0;letter-spacing:-.01em}
+p{margin:0}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.kicker{font:500 12px/1 var(--b);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Boutons — orange plein, texte noir (contraste 6:1) */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 26px;border-radius:var(--r-block);background:var(--accent);color:var(--background);font:600 17px/1 var(--b);text-decoration:none;transition:transform .15s,box-shadow .2s;box-shadow:0 10px 30px -10px var(--accent)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 36px -10px var(--accent)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.ghost:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.btn .ico{width:20px;height:20px}
+.ghost{display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 18px;border-radius:var(--r-block);border:1px solid var(--line);color:var(--ink);font:600 16px/1 var(--b);text-decoration:none;background:var(--card)}
+.ghost:hover{border-color:var(--ink-3)}
+
+/* En-tête */
+.nav{position:relative;display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{display:block;width:104px;height:34px;overflow:hidden;position:relative}
+/* Le PNG du logo a de larges marges transparentes : on recadre sur le motif. */
+.logo img{position:absolute;width:145px;height:auto;left:-19px;top:-21px;mix-blend-mode:lighten}
+/* Le PNG a un fond noir opaque : « lighten » le rend invisible sur fond sombre (halo orange compris). */
+.nav .btn{min-height:42px;padding:0 16px;font-size:15px;border-radius:var(--r-card);box-shadow:none}
+
+/* Hero */
+.hero{position:relative;overflow:hidden;padding-bottom:56px}
+.hero::before{content:"";position:absolute;inset:-30% -40% auto auto;width:720px;height:720px;background:radial-gradient(closest-side,var(--glow),transparent);pointer-events:none}
+.hero-grid{position:relative;display:grid;gap:44px;align-items:center;padding-top:16px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;font:500 13px/1.2 var(--b);color:var(--ink-2);background:var(--card)}
+.eyebrow b{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--glow)}
+.hero h1{font-size:clamp(36px,9.6vw,64px);margin:18px 0 16px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.lead{font-size:18px;color:var(--ink-2);max-width:34em}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.cta-row .btn{flex:1 1 220px}
+.reassure{display:flex;flex-wrap:wrap;gap:6px 16px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
+.reassure li{display:flex;align-items:center;gap:6px}
+.reassure .ico{width:16px;height:16px;color:var(--accent)}
+
+/* Maquette téléphone animée : 1 vente → caisse + stock */
+.demo{position:relative;justify-self:center;width:min(100%,330px)}
+.phone{border-radius:38px;padding:10px;background:#0d0d0d;border:1px solid var(--line);box-shadow:0 40px 80px -30px var(--glow),0 0 0 1px rgba(255,255,255,.03) inset}
+.screen{border-radius:30px;overflow:hidden;background:var(--surface);color:var(--text)}
+.app-top{display:flex;align-items:center;gap:8px;padding:16px 16px 12px;border-bottom:1px solid var(--border);font:700 16px var(--h)}
+.app-top i{width:24px;height:24px;border-radius:6px;background:var(--accent) url(/brand/korise-icon.png) center/120% no-repeat}
+.app-top span{margin-left:auto;font:500 11px var(--b);color:var(--success);display:flex;align-items:center;gap:5px}
+.app-top span::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--success)}
+.app-body{padding:16px}
+.app-h{font:700 22px var(--h)}
+.app-sub{font-size:12px;color:var(--text-muted);margin:2px 0 14px}
+.toast{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-card);background:var(--background);color:var(--surface);font-size:13px;line-height:1.3;margin-bottom:12px}
+.toast .ico{width:18px;height:18px;padding:3px;border-radius:50%;background:var(--accent);color:var(--background);stroke-width:3}
+.toast b{display:block;font-weight:600}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{border:1px solid var(--border);border-radius:var(--r-card);padding:11px 12px;background:var(--surface)}
+.kpi.wide{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+.kl{display:block;font:500 10px/1.2 var(--b);letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+.kv{display:grid;font:700 19px/1.1 var(--h)}
+.kv>*{grid-area:1/1}
+.kv small{font-size:12px}
+.delta{font:700 13px var(--h);color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent);padding:4px 8px;border-radius:var(--r-field)}
+.closing{display:flex;align-items:center;gap:8px;margin-top:10px;padding:11px 12px;border-radius:var(--r-card);background:color-mix(in srgb,var(--success) 9%,transparent);color:var(--success);font:600 13px var(--b)}
+.closing .ico{width:18px;height:18px}
+.alert{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;border-radius:var(--r-card);border:1px solid var(--border);font-size:12px;line-height:1.3}
+.alert .ico{width:18px;height:18px;color:var(--danger)}
+.alert b{display:block;font-weight:600;font-size:13px}
+.demo-cap{display:flex;justify-content:center;gap:8px;margin-top:16px;font-size:13px;color:var(--ink-3)}
+.demo-cap b{color:var(--accent);font-weight:600}
+
+@media (prefers-reduced-motion:no-preference){
+  .toast{animation:toast 7s infinite both}
+  .kv .a{animation:out 7s infinite both}
+  .kv .n{animation:in 7s infinite both}
+  .kpi.hl{animation:hl 7s infinite both}
+  .delta{animation:in 7s infinite both}
+}
+@media (prefers-reduced-motion:reduce){ .kv .a{opacity:0} }
+@keyframes toast{0%,12%{opacity:0;transform:translateY(-8px) scale(.97)}20%,84%{opacity:1;transform:none}94%,100%{opacity:0;transform:translateY(-8px) scale(.97)}}
+@keyframes out{0%,26%{opacity:1;transform:none}32%,90%{opacity:0;transform:translateY(-6px)}97%,100%{opacity:1;transform:none}}
+@keyframes in{0%,26%{opacity:0;transform:translateY(6px)}32%,90%{opacity:1;transform:none}97%,100%{opacity:0;transform:translateY(6px)}}
+@keyframes hl{0%,26%{border-color:var(--border);box-shadow:none}32%{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-light)}60%,100%{border-color:var(--border);box-shadow:none}}
+
+/* Preuve */
+.proof{border-block:1px solid var(--line);padding:22px 0}
+.proof .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px}
+.client{display:flex;align-items:center;gap:12px}
+.client i{display:grid;place-items:center;width:44px;height:44px;border-radius:var(--r-card);background:var(--accent);color:var(--background);font:700 14px var(--h);font-style:normal}
+.client b{display:block;font:600 15px/1.3 var(--b)}
+.client span{font-size:13px;color:var(--ink-3)}
+.for{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.for li{padding:6px 12px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--ink-2)}
+
+/* Sections */
+section.s{padding:72px 0}
+.s-head{max-width:640px;margin-bottom:34px}
+.s-head h2{font-size:clamp(28px,7vw,44px);margin-top:12px}
+.s-head h2 em{font-style:normal;color:var(--accent)}
+.s-head p{margin-top:12px;color:var(--ink-2);font-size:17px}
+
+.cards{display:grid;gap:14px}
+.card{position:relative;padding:24px;border:1px solid var(--line);border-radius:var(--r-block);background:var(--card)}
+.card .badge{display:grid;place-items:center;width:46px;height:46px;border-radius:var(--r-card);background:var(--glow);color:var(--accent);margin-bottom:18px}
+.card h3{font-size:21px;margin-bottom:8px}
+.card p{color:var(--ink-2)}
+.card .fig{display:inline-block;margin-top:16px;font:700 26px var(--h);color:var(--accent)}
+.card .fig small{font:500 13px var(--b);color:var(--ink-3);margin-left:6px}
+.extras{display:flex;flex-wrap:wrap;gap:10px 22px;margin:26px 0 0;padding:0;list-style:none;color:var(--ink-2);font-size:15px}
+.extras li{display:flex;align-items:center;gap:8px}
+.extras .ico{width:18px;height:18px;color:var(--accent)}
+
+.steps{display:grid;gap:14px;counter-reset:st;margin:0;padding:0;list-style:none}
+.steps li{display:flex;gap:16px;padding:22px;border-radius:var(--r-block);border:1px solid var(--line);background:var(--card)}
+.steps li::before{counter-increment:st;content:counter(st);display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--background);font:700 18px var(--h)}
+.steps h3{font-size:19px;margin:6px 0 6px}
+.steps p{color:var(--ink-2)}
+
+/* Vidéo */
+.video{position:relative;display:grid;place-items:center;aspect-ratio:16/9;border-radius:var(--r-block);overflow:hidden;border:1px solid var(--line);text-decoration:none;background:radial-gradient(120% 90% at 80% 10%,var(--glow),transparent 60%),repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 14px,transparent 14px 28px),#0a0a0a}
+.video .play{display:grid;place-items:center;width:84px;height:84px;border-radius:50%;background:var(--accent);color:var(--background);box-shadow:0 0 0 12px var(--glow);transition:transform .2s}
+.video:hover .play{transform:scale(1.06)}
+.video .play .ico{width:34px;height:34px;fill:currentColor;margin-left:4px}
+.video .vl{position:absolute;left:18px;bottom:16px;right:18px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;font-size:14px;color:var(--ink-2)}
+.video .vl b{display:block;font:700 18px var(--h);color:var(--ink)}
+.video .tag{padding:6px 10px;border-radius:var(--r-field);background:rgba(0,0,0,.6);border:1px solid var(--line);font:500 12px var(--b);white-space:nowrap}
+.video.soon{cursor:default}
+
+/* Essai */
+.trial{display:grid;gap:28px;padding:32px 24px;border-radius:24px;background:var(--accent);color:var(--background);position:relative;overflow:hidden}
+.trial::after{content:"";position:absolute;right:-80px;top:-80px;width:280px;height:280px;border-radius:50%;border:44px solid rgba(0,0,0,.08)}
+.trial .kicker{color:var(--background);opacity:.75}
+.trial .big{font:700 clamp(64px,18vw,112px)/.9 var(--h);margin:12px 0 6px;letter-spacing:-.03em}
+.trial .big small{font-size:.32em;letter-spacing:0;margin-left:6px}
+.trial p{font-size:17px;max-width:26em}
+.trial ul{display:grid;gap:12px;margin:0;padding:0;list-style:none;font:500 16px var(--b);position:relative;z-index:1}
+.trial li{display:flex;gap:10px;align-items:center}
+.trial li .ico{width:22px;height:22px;padding:4px;border-radius:50%;background:var(--background);color:var(--accent);stroke-width:3}
+.trial .btn{background:var(--background);color:var(--surface);box-shadow:none;width:100%;position:relative;z-index:1}
+
+/* WhatsApp */
+.wa{display:grid;gap:20px;align-items:center;padding:28px 24px;border:1px solid var(--line);border-radius:var(--r-block);background:var(--card)}
+.wa h2{font-size:26px}
+.wa p{color:var(--ink-2);margin-top:8px}
+.wa .num{font:700 20px var(--h);color:var(--accent);margin-top:12px;display:block}
+
+/* FAQ */
+.faq{display:grid;gap:10px;max-width:760px}
+.faq details{border:1px solid var(--line);border-radius:var(--r-block);background:var(--card)}
+.faq summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px;cursor:pointer;list-style:none;font:600 17px/1.35 var(--b)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary .ico{transition:transform .2s;color:var(--accent)}
+.faq details[open] summary .ico{transform:rotate(180deg)}
+.faq details p{padding:0 22px 20px;color:var(--ink-2)}
+
+/* Pied de page */
+footer{border-top:1px solid var(--line);padding:40px 0 120px;color:var(--ink-3);font-size:14px}
+.foot{display:grid;gap:22px}
+.foot .tag{color:var(--ink-2);margin-top:10px}
+.social{display:flex;gap:10px;flex-wrap:wrap}
+.social a{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink-2)}
+.social a:hover{border-color:var(--accent);color:var(--ink)}
+.social .ico{width:16px;height:16px}
+.legal{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding-top:22px;border-top:1px solid var(--line)}
+.legal a{color:var(--ink-2)}
+.legal .korah{color:var(--accent);font-weight:600;text-decoration:none}
+.legal .korah:hover{text-decoration:underline}
+
+/* Barre CTA collante (mobile) */
+.sticky{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(0,0,0,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);transform:translateY(110%);transition:transform .25s}
+.sticky.on{transform:none}
+.sticky .btn{width:100%;min-height:50px}
+
+@media (min-width:720px){
+  .cards{grid-template-columns:repeat(3,1fr)}
+  .steps{grid-template-columns:repeat(3,1fr)}
+  .steps li{flex-direction:column}
+  .wa{grid-template-columns:1fr auto;padding:32px}
+  .foot{grid-template-columns:1fr auto;align-items:start}
+  .trial{grid-template-columns:1.1fr 1fr;align-items:center;padding:48px}
+  .trial .btn{grid-column:1/-1;width:auto;justify-self:start}
+}
+@media (min-width:960px){
+  .hero-grid{grid-template-columns:1.15fr .85fr;padding-top:40px}
+  .hero{padding-bottom:88px}
+  .cta-row .btn{flex:0 0 auto}
+  section.s{padding:104px 0}
+  .sticky{display:none}
+  footer{padding-bottom:40px}
+}
+</style>
+</head>
+<body>
+<!-- Icônes Lucide (outline), en sprite inline : aucune requête en plus. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-wifioff" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17-2.69"/><path d="M19 12.859a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/></symbol>
+  <symbol id="i-banknote" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+</svg>
+
+<header class="hero">
+  <div class="wrap">
+    <nav class="nav" aria-label="Principal">
+      <a class="logo" href="/" aria-label="Korise, accueil"><img src="/brand/korise-logo-full.png" alt="Korise" width="1080" height="491" fetchpriority="high"></a>
+      <a class="btn" data-cta href="%%APP_URL%%/login/?mode=register&amp;src=landing">Essayer</a>
+    </nav>
+
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow"><b></b>Pour les commerces du Cameroun</span>
+        <h1>Votre argent et votre stock, <em>sous contrôle.</em> Même absent.</h1>
+        <p class="lead">Une vente saisie met à jour la caisse et le stock. Le soir, Korise vous dit s’il manque de l’argent.</p>
+        <div class="cta-row" id="hero-cta">
+          <a class="btn" data-cta href="%%APP_URL%%/login/?mode=register&amp;src=landing">Essayer gratuitement <svg class="ico"><use href="#i-arrow"/></svg></a>
+          <a class="ghost" href="#video"><svg class="ico"><use href="#i-play"/></svg>Voir la démo</a>
+        </div>
+        <ul class="reassure">
+          <li><svg class="ico"><use href="#i-check"/></svg>15 jours offerts</li>
+          <li><svg class="ico"><use href="#i-check"/></svg>Sans paiement</li>
+          <li><svg class="ico"><use href="#i-check"/></svg>Prêt en 2 minutes</li>
+        </ul>
+      </div>
+
+      <div class="demo" aria-label="Exemple : une vente de 3 jus à 1 500 FCFA met à jour la caisse et le stock">
+        <div class="phone"><div class="screen">
+          <div class="app-top"><i></i>Korise<span>Synchronisé</span></div>
+          <div class="app-body">
+            <p class="app-h">Aujourd’hui</p>
+            <p class="app-sub">L’argent et le stock correspondent-ils ?</p>
+            <div class="toast"><svg class="ico"><use href="#i-check"/></svg><div><b>Vente enregistrée</b>3 × Jus d’ananas · 1 500 FCFA</div></div>
+            <div class="kpis">
+              <div class="kpi hl"><span class="kl">Ventes du jour</span><span class="kv"><span class="a">12 500 <small>FCFA</small></span><span class="n">14 000 <small>FCFA</small></span></span></div>
+              <div class="kpi hl"><span class="kl">Caisse attendue</span><span class="kv"><span class="a">12 500 <small>FCFA</small></span><span class="n">14 000 <small>FCFA</small></span></span></div>
+              <div class="kpi wide hl"><div><span class="kl">Stock · Jus d’ananas</span><span class="kv"><span class="a">24 unités</span><span class="n">21 unités</span></span></div><span class="delta">−3</span></div>
+            </div>
+            <div class="alert"><svg class="ico"><use href="#i-package"/></svg><div><b>Alerte stock</b>Savon de ménage : 5 restants</div></div>
+            <div class="closing"><svg class="ico"><use href="#i-shield"/></svg>Clôture d’hier : écart 0 FCFA</div>
+          </div>
+        </div></div>
+        <p class="demo-cap"><b>1 saisie</b> → caisse + stock à jour</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="proof">
+  <div class="wrap">
+    <div class="client"><i>YIM</i><div><b>Secrétariat Bureautique YIM Multimedia</b><span>Douala · utilise Korise</span></div></div>
+    <ul class="for" aria-label="Pensé pour">
+      <li>Boutiques</li><li>Alimentations</li><li>Bars</li><li>Quincailleries</li><li>Secrétariats</li><li>Cosmétiques</li>
+    </ul>
+  </div>
+</div>
+
+<main>
+  <section class="s" id="benefices">
+    <div class="wrap">
+      <div class="s-head">
+        <span class="kicker">Pourquoi Korise</span>
+        <h2>Ce soir, il manque <em>6 000 FCFA</em>. Qui, quand, comment ?</h2>
+        <p>Korise vous donne la réponse, sans cahier ni calculatrice.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <span class="badge"><svg class="ico"><use href="#i-wallet"/></svg></span>
+          <h3>Une caisse qui ne ment pas</h3>
+          <p>Korise calcule la caisse attendue. Vous comptez, l’écart s’affiche au franc près.</p>
+          <span class="fig">−6 000 FCFA<small>vu le soir même</small></span>
+        </article>
+        <article class="card">
+          <span class="badge"><svg class="ico"><use href="#i-package"/></svg></span>
+          <h3>Le stock se compte tout seul</h3>
+          <p>Vous vendez 3 jus, le stock passe de 24 à 21. Alerte avant la rupture.</p>
+          <span class="fig">24 → 21<small>sans recompter</small></span>
+        </article>
+        <article class="card">
+          <span class="badge"><svg class="ico"><use href="#i-lock"/></svg></span>
+          <h3>Vos employés vendent, vous décidez</h3>
+          <p>Chacun son code PIN. Ils ne voient ni vos prix d’achat ni vos bénéfices.</p>
+          <span class="fig">1 code<small>par employé</small></span>
+        </article>
+      </div>
+      <ul class="extras">
+        <li><svg class="ico"><use href="#i-wifioff"/></svg>Marche sans internet</li>
+        <li><svg class="ico"><use href="#i-banknote"/></svg>Espèces, MTN MoMo, Orange Money</li>
+        <li><svg class="ico"><use href="#i-receipt"/></svg>Reçus et rapports PDF</li>
+        <li><svg class="ico"><use href="#i-phone"/></svg>Téléphone ou ordinateur</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="s" id="comment" style="padding-top:0">
+    <div class="wrap">
+      <div class="s-head">
+        <span class="kicker">Comment ça marche</span>
+        <h2>Prêt à vendre en 3 étapes</h2>
+      </div>
+      <ol class="steps">
+        <li><div><h3>Créez votre boutique</h3><p>Nom, téléphone, code PIN. C’est tout : 2 minutes.</p></div></li>
+        <li><div><h3>Ajoutez produits et employés</h3><p>Prix, quantité en stock, un code par employé.</p></div></li>
+        <li><div><h3>Vendez, Korise fait les comptes</h3><p>Le soir, comptez la caisse : l’écart s’affiche tout seul.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="s" id="video" style="padding-top:0">
+    <div class="wrap">
+      <div class="s-head">
+        <span class="kicker">Démo</span>
+        <h2>Voyez Korise en action</h2>
+        <p>Une vente, une saisie : la caisse et le stock bougent en direct.</p>
+      </div>
+      <a class="video" id="video-link" href="%%YOUTUBE_URL%%" target="_blank" rel="noopener">
+        <span class="play"><svg class="ico"><use href="#i-play"/></svg></span>
+        <span class="vl"><span><b>La démo complète</b>Vente, stock, clôture du soir</span><span class="tag" id="video-tag">Regarder sur YouTube</span></span>
+      </a>
+    </div>
+  </section>
+
+  <section class="s" id="essai" style="padding-top:0">
+    <div class="wrap">
+      <div class="trial">
+        <div>
+          <span class="kicker">Essai gratuit</span>
+          <p class="big">15<small>jours</small></p>
+          <p>Pour tester Korise dans votre boutique, avec vos vrais produits. Sans rien payer.</p>
+        </div>
+        <ul>
+          <li><svg class="ico"><use href="#i-check"/></svg>Toutes les fonctions incluses</li>
+          <li><svg class="ico"><use href="#i-check"/></svg>Aucun paiement à l’inscription</li>
+          <li><svg class="ico"><use href="#i-check"/></svg>Vos données restent à vous</li>
+          <li><svg class="ico"><use href="#i-check"/></svg>Aide sur WhatsApp, en français</li>
+        </ul>
+        <a class="btn" data-cta href="%%APP_URL%%/login/?mode=register&amp;src=landing">Essayer gratuitement <svg class="ico"><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="s" id="contact" style="padding-top:0">
+    <div class="wrap">
+      <div class="wa">
+        <div>
+          <h2>Une question avant de commencer ?</h2>
+          <p>Écrivez-nous sur WhatsApp, l’équipe Korise vous répond.</p>
+          <a class="num" data-wa href="https://wa.me/%%WHATSAPP%%">+237 673 85 41 85</a>
+        </div>
+        <a class="ghost" data-wa href="https://wa.me/%%WHATSAPP%%"><svg class="ico"><use href="#i-msg"/></svg>Écrire sur WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="s" id="faq" style="padding-top:0">
+    <div class="wrap">
+      <div class="s-head"><span class="kicker">Questions fréquentes</span><h2>Vous vous demandez…</h2></div>
+      <div class="faq">
+        <details>
+          <summary>Et quand il n’y a pas de réseau ?<svg class="ico"><use href="#i-chev"/></svg></summary>
+          <p>Korise continue de marcher. Tout se synchronise dès que la connexion revient.</p>
+        </details>
+        <details>
+          <summary>Mes employés verront-ils mes bénéfices ?<svg class="ico"><use href="#i-chev"/></svg></summary>
+          <p>Non. Par défaut, ils ne voient ni prix d’achat ni rapports. C’est vous qui décidez.</p>
+        </details>
+        <details>
+          <summary>Faut-il acheter un appareil ?<svg class="ico"><use href="#i-chev"/></svg></summary>
+          <p>Non. Votre téléphone ou votre ordinateur suffit. Rien à installer pour commencer.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="logo" href="/" aria-label="Korise"><img src="/brand/korise-logo-full.png" alt="Korise" width="1080" height="491" loading="lazy"></a>
+        <p class="tag">%%TAGLINE%%</p>
+      </div>
+      <div class="social" id="social">
+        <a data-wa href="https://wa.me/%%WHATSAPP%%"><svg class="ico"><use href="#i-msg"/></svg>WhatsApp</a>
+        <a href="%%APP_URL%%/login/">Se connecter</a>
+      </div>
+    </div>
+    <div class="legal">
+      <span>© <span id="y">2026</span> Korise</span>
+      <span>Développé par <a class="korah" href="https://korah-web-nine.vercel.app/en" target="_blank" rel="noopener">Korah</a></span>
+    </div>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky">
+  <a class="btn" data-cta href="%%APP_URL%%/login/?mode=register&amp;src=landing">Essayer gratuitement — 15 jours</a>
+</div>
+
+<script>
+(function(){
+  var APP='%%APP_URL%%', WA='%%WHATSAPP%%', YT='%%YOUTUBE_URL%%';
+  var SOCIAL=%%SOCIAL_JSON%%;
+  // Liens traçables : /fb /ig /tt /wa (ou ?src=, ?utm_source=) → canal transmis à l'inscription.
+  var ALIAS={fb:'facebook',facebook:'facebook',ig:'instagram',instagram:'instagram',tt:'tiktok',tiktok:'tiktok',wa:'whatsapp',whatsapp:'whatsapp'};
+  var NAMES={facebook:'Facebook',instagram:'Instagram',tiktok:'TikTok',whatsapp:'WhatsApp'};
+  var q=new URLSearchParams(location.search);
+  var raw=(q.get('src')||q.get('utm_source')||location.pathname.replace(/^\/+|\/+$/g,'')||'').toLowerCase();
+  var src=ALIAS[raw]||(/^[a-z0-9_-]{1,32}$/.test(raw)?raw:'');
+  try{ if(src) localStorage.setItem('korise.src',src); else src=localStorage.getItem('korise.src')||''; }catch(e){}
+  if(!src) src='landing';
+
+  var cta=APP+'/login/?mode=register&src='+encodeURIComponent(src);
+  document.querySelectorAll('[data-cta]').forEach(function(a){a.href=cta;});
+
+  var msg='Bonjour Korise, '+(NAMES[src]?'je vous ai découvert sur '+NAMES[src]+". J'ai":"j'ai")+" une question sur l'application.";
+  document.querySelectorAll('[data-wa]').forEach(function(a){a.href='https://wa.me/'+WA+'?text='+encodeURIComponent(msg);a.target='_blank';a.rel='noopener';});
+
+  var v=document.getElementById('video-link');
+  if(!YT){v.removeAttribute('href');v.classList.add('soon');document.getElementById('video-tag').textContent='Bientôt en ligne';}
+
+  var box=document.getElementById('social');
+  SOCIAL.forEach(function(s){var a=document.createElement('a');a.href=s.url;a.target='_blank';a.rel='noopener';a.textContent=s.label;box.insertBefore(a,box.lastElementChild);});
+
+  document.getElementById('y').textContent=new Date().getFullYear();
+
+  var sticky=document.getElementById('sticky'), hero=document.getElementById('hero-cta'), trial=document.getElementById('essai');
+  if('IntersectionObserver' in window){
+    var seen={hero:true,trial:false};
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){seen[e.target===hero?'hero':'trial']=e.isIntersecting;});sticky.classList.toggle('on',!seen.hero&&!seen.trial);});
+    io.observe(hero);io.observe(trial);
+  }
+})();
+</script>
+</body>
+</html>

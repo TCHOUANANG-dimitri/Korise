@@ -1,4 +1,5 @@
 import random
+import re
 import string
 import uuid
 
@@ -50,10 +51,24 @@ def _token_for(user: User, business: Business) -> TokenResponse:
     )
 
 
+_SOURCE_RE = re.compile(r"^[a-z0-9_-]{1,32}$")
+
+
+def normalize_signup_source(raw: str | None) -> str | None:
+    """Slug court et sûr (minuscules, chiffres, - et _) ou None — c'est une donnée marketing
+    venue d'une URL publique, on ne stocke jamais autre chose."""
+    if not raw:
+        return None
+    value = raw.strip().lower()
+    return value if _SOURCE_RE.match(value) else None
+
+
 def register_business(session: Session, request: RegisterBusinessRequest, client=None) -> TokenResponse:
+    source = normalize_signup_source(request.signup_source)
     business = Business(
         name=request.business_name,
         sector=request.sector,
+        signup_source=source,
         business_code=_generate_business_code(session),
     )
     session.add(business)
@@ -93,7 +108,7 @@ def register_business(session: Session, request: RegisterBusinessRequest, client
         device_key=getattr(client, "device_key", None),
         platform=getattr(client, "platform", None),
         app_version=getattr(client, "app_version", None),
-        meta={"sector": request.sector},
+        meta={"sector": request.sector, "source": source},
     )
     if getattr(client, "device_key", None):
         upsert_device(session, business.id, owner.id, client.device_key, client.platform or "web", client.app_version)
