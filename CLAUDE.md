@@ -214,8 +214,13 @@ retirer.
   jamais l'inscription). Web : `lib/acquisition.ts` + `/login` lit `?mode=register&src=`. Super Admin
   Analytics : « Inscriptions par canal » (inscrits + part ayant vendu). Tests :
   `backend/tests/test_signup_source.py`.
-- **Le PNG `korise-logo-full.png` a un fond noir opaque** (pas transparent) : sur fond sombre la landing
-  le rend avec `mix-blend-mode: lighten`. Sur fond clair, il faudrait une version transparente.
+- **`korise-logo-full.png` (mis à jour 2026-10-08) : fond transparent + sous-titre « Korah Business
+  Manager » en NOIR** → illisible sur fond sombre. La landing (fond noir) utilise donc icône +
+  « Korise » en Signika ; idem pour l'image de partage `src/og.png`. Une variante « fond sombre » (sous-titre
+  blanc) serait nécessaire pour réutiliser le logo complet sur noir (page `/login` web incluse).
+- Réseaux (config.json `social`) : Facebook, Instagram, TikTok, YouTube + WhatsApp, rendus au build en
+  icônes rondes dans le pied de page (logos simple-icons CC0 — Lucide n'a pas d'icônes de marque, seule
+  exception à la règle « Lucide uniquement ») + JSON-LD `Organization.sameAs`.
 
 ## Prochaines étapes backend (dette explicite, pas oubliée)
 

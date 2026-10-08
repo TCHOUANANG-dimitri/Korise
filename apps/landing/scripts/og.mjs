@@ -13,7 +13,7 @@ const kebab = (s) => s.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
 const css = `:root{${Object.entries(tokens.color).map(([k, v]) => `--${kebab(k)}:${v}`).join(';')}}`;
 const html = readFileSync(join(here, 'og.html'), 'utf8')
   .replace('/*%%TOKENS%%*/', css)
-  .replace('%%LOGO%%', pathToFileURL(join(shared, 'brand', 'korise-logo-full.png')).href);
+  .replace('%%LOGO%%', pathToFileURL(join(shared, 'brand', 'korise-icon.png')).href);
 const tmp = join(tmpdir(), 'korise-og.html');
 writeFileSync(tmp, html);
 
