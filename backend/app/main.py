@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+import re
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -38,15 +42,51 @@ app.add_middleware(
 )
 
 
+_cors_origin_re = re.compile(settings.cors_allow_origin_regex) if settings.cors_allow_origin_regex else None
+
+
+def _cors_headers_for(request: Request) -> dict[str, str]:
+    """En-têtes CORS minimaux pour une réponse d'erreur construite hors de CORSMiddleware.
+
+    Starlette enregistre un handler `@app.exception_handler(Exception)` sur le
+    ServerErrorMiddleware, qui est PLUS externe que CORSMiddleware : la 500 qu'il
+    génère ne traverse donc jamais CORSMiddleware et part sans
+    `access-control-allow-origin` — le navigateur la bloque et le client affiche
+    « Backend injoignable » au lieu de la vraie erreur (incident du 2026-10-14).
+    On reproduit ici exactement la décision d'origine de CORSMiddleware
+    (liste + regex, même `fullmatch` que Starlette)."""
+    origin = request.headers.get("origin")
+    if not origin:
+        return {}
+    allowed = origin in settings.cors_allow_origins or (
+        _cors_origin_re is not None and _cors_origin_re.fullmatch(origin) is not None
+    )
+    if not allowed:
+        return {}
+    return {
+        "access-control-allow-origin": origin,
+        "access-control-allow-credentials": "true",
+        "vary": "Origin",
+    }
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """Toute exception non gérée devient une 500 JSON qui garde ses en-têtes CORS
+    (voir `_cors_headers_for`) pour que le client voie la vraie erreur."""
+    _log_server_error(request, type(exc).__name__)
+    return JSONResponse(
+        {"detail": "Erreur interne du serveur"}, status_code=500, headers=_cors_headers_for(request)
+    )
+
+
 @app.middleware("http")
 async def track_server_errors(request: Request, call_next):
-    """Every unhandled exception / 5xx becomes a `server.error` platform event, so the Super
-    Admin sees error spikes before a customer complains (cahier Super Admin §11, §18)."""
-    try:
-        response = await call_next(request)
-    except Exception as exc:  # noqa: BLE001
-        _log_server_error(request, type(exc).__name__)
-        return JSONResponse({"detail": "Erreur interne du serveur"}, status_code=500)
+    """Every 5xx status becomes a `server.error` platform event, so the Super Admin sees
+    error spikes before a customer complains (cahier Super Admin §11, §18). Ce middleware
+    ne construit jamais de réponse lui-même — il laisse passer celle de l'intérieur
+    (déjà enrichie par CORS) pour ne jamais perdre les en-têtes CORS."""
+    response = await call_next(request)
     if response.status_code >= 500:
         _log_server_error(request, str(response.status_code))
     return response
