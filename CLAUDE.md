@@ -234,3 +234,7 @@ retirer.
 
 Pricing, marketing, acquisition, segmentation finale de marché, différenciation finale vs
 concurrents (Odoo, KiboERP, ShopTrack). Voir MVP_SPEC.md section 7.
+
+**Exception (2026-09-30)** : le fondateur a demandé une stratégie marketing de lancement (sans pub,
+FR/EN, Douala/Yaoundé, 5 h/jour). Elle est rédigée dans le doc Claude « Stratégie de lancement Korise »
+(https://claude.ai/code/artifact/7d71610c-6557-43bf-a434-1ab91c59fe62). Le pricing reste à décider.
