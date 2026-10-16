@@ -7,7 +7,7 @@ export default function Logo({ variant = 'icon', className }: { variant?: 'full'
     return (
       <div className="flex flex-col items-center gap-2">
         <Image
-          src="/brand/korise-logo-full.png?v=2"
+          src="/brand/korise-logo-full.png?v=3"
           alt="Korise — Votre activité, sous contrôle"
           width={480}
           height={218}

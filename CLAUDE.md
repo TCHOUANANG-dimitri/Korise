@@ -214,8 +214,12 @@ retirer.
   jamais l'inscription). Web : `lib/acquisition.ts` + `/login` lit `?mode=register&src=`. Super Admin
   Analytics : « Inscriptions par canal » (inscrits + part ayant vendu). Tests :
   `backend/tests/test_signup_source.py`.
-- **`korise-logo-full.png` (mis à jour 2026-10-08) : fond transparent + sous-titre « Korah Business
-  Manager » en NOIR** → illisible sur fond sombre. La landing (fond noir) utilise donc icône +
+- **Logo : la seule source est `packages/shared/brand/`** — `apps/web/public/brand/` est régénéré à
+  chaque build (`scripts/sync-brand.mjs`) et ignoré par git ; un logo déposé là est écrasé. Après un
+  changement, incrémenter le `?v=` dans `Logo.tsx` (cache navigateur). Mobile : copie séparée dans
+  `apps/mobile/assets/brand/`, embarquée dans l'APK (nouveau build nécessaire).
+- Nouveau `korise-logo-full.png` (2026-10-16) : icône + « Korise » orange, sans sous-titre. Ancienne
+  version (2026-10-08) : sous-titre « Korah Business Manager » en NOIR → illisible sur fond sombre. La landing (fond noir) utilise donc icône +
   « Korise » en Signika ; idem pour l'image de partage `src/og.png`. Une variante « fond sombre » (sous-titre
   blanc) serait nécessaire pour réutiliser le logo complet sur noir (page `/login` web incluse).
 - Réseaux (config.json `social`) : Facebook, Instagram, TikTok, YouTube + WhatsApp, rendus au build en
