@@ -5,6 +5,7 @@ from enum import Enum
 from pydantic import BaseModel
 
 from app.models.events import MoneyMovementChannel
+from app.schemas.validators import LenientPhone
 
 
 class ManualMoneyMovementType(str, Enum):
@@ -56,7 +57,7 @@ class StockMovementIn(BaseModel):
 class CustomerIn(BaseModel):
     client_uuid: uuid.UUID
     full_name: str
-    phone: str | None = None
+    phone: LenientPhone = None
 
 
 class CreditRepaymentIn(BaseModel):

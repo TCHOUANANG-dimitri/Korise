@@ -10,6 +10,7 @@ import { Session, setSession } from '../../lib/session';
 import { rememberPin } from '../../lib/lock';
 import { captureSignupSource, getSignupSource } from '../../lib/acquisition';
 import Logo from '../components/Logo';
+import { digitsOnly, phoneOnly, PHONE_MAX_LENGTH, PHONE_PLACEHOLDER } from '../../lib/inputs';
 
 type Mode = 'login' | 'register';
 
@@ -140,7 +141,8 @@ export default function LoginPage() {
                 inputMode="numeric"
                 className="field-input mb-5"
                 value={pin}
-                onChange={(e) => setPin(e.target.value)}
+                maxLength={8}
+                onChange={(e) => setPin(digitsOnly(e.target.value))}
                 required
               />
               <button type="submit" className="btn-accent w-full" disabled={busy}>
@@ -188,8 +190,12 @@ export default function LoginPage() {
               <input
                 id="owner_phone"
                 className="field-input mb-4"
+                type="tel"
+                inputMode="tel"
+                maxLength={PHONE_MAX_LENGTH}
+                placeholder={PHONE_PLACEHOLDER}
                 value={ownerPhone}
-                onChange={(e) => setOwnerPhone(e.target.value)}
+                onChange={(e) => setOwnerPhone(phoneOnly(e.target.value))}
               />
               <label className="field-label" htmlFor="new_pin">
                 Choisissez un code PIN
@@ -200,7 +206,7 @@ export default function LoginPage() {
                 inputMode="numeric"
                 className="field-input mb-5"
                 value={newPin}
-                onChange={(e) => setNewPin(e.target.value)}
+                onChange={(e) => setNewPin(digitsOnly(e.target.value))}
                 minLength={4}
                 maxLength={8}
                 required

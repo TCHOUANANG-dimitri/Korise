@@ -13,6 +13,7 @@ import {
 } from '../../lib/repo';
 import { createProduct, updateProduct } from '../../lib/api';
 import { formatFcfa } from '../../lib/format';
+import { digitsOnly } from '../../lib/inputs';
 import { getSession } from '../../lib/session';
 
 type MoveKind = 'restock' | 'adjustment';
@@ -30,6 +31,8 @@ type ProductDraft = {
   category: string;
   is_stockable: boolean;
 };
+
+const NUMERIC_FIELDS: (keyof ProductDraft)[] = ['purchase_price', 'selling_price', 'minimum_stock'];
 
 const emptyDraft = (): ProductDraft => ({
   id: null,
@@ -297,7 +300,7 @@ function ProductForm({
   if (!isOwner) return null;
 
   const set = (field: keyof ProductDraft) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setD((prev) => ({ ...prev, [field]: e.target.value }));
+    setD((prev) => ({ ...prev, [field]: NUMERIC_FIELDS.includes(field) ? digitsOnly(e.target.value) : e.target.value }));
 
   return (
     <div className="mt-6 rounded-field border border-border bg-surface p-4">

@@ -6,6 +6,7 @@ import { Check, CheckCircle2, Copy, Crown, FileText, RefreshCw, Settings2, Trash
 import { useData } from '../../lib/useData';
 import { createEmployee, deleteEmployee, listEmployees, openPdf, updateEmployee, EmployeeApi } from '../../lib/api';
 import { getSession } from '../../lib/session';
+import { digitsOnly, phoneOnly, PHONE_MAX_LENGTH, PHONE_PLACEHOLDER } from '../../lib/inputs';
 
 const PIN_MIN = 4;
 const PIN_MAX = 8;
@@ -292,10 +293,10 @@ function CreateEmployeeForm({ onCreated }: { onCreated: () => void }) {
       <input id="ename" className="field-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="ex. Marc Eyenga" />
 
       <label className="mt-3 field-label" htmlFor="ephone">Téléphone (optionnel)</label>
-      <input id="ephone" className="field-input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="ex. 6 90 00 00 00" />
+      <input id="ephone" className="field-input" type="tel" inputMode="tel" maxLength={PHONE_MAX_LENGTH} value={phone} onChange={(e) => setPhone(phoneOnly(e.target.value))} placeholder={PHONE_PLACEHOLDER} />
 
       <label className="mt-3 field-label" htmlFor="epin">PIN (4 à 8 chiffres, à remettre à l&rsquo;employé)</label>
-      <input id="epin" className="field-input" inputMode="numeric" maxLength={PIN_MAX} value={pin} onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, ''))} placeholder="ex. 1234" />
+      <input id="epin" className="field-input" inputMode="numeric" maxLength={PIN_MAX} value={pin} onChange={(e) => setPin(digitsOnly(e.target.value))} placeholder="ex. 1234" />
 
       <div className="mt-4 space-y-2">
         <label className="flex cursor-pointer items-center gap-2 text-sm">

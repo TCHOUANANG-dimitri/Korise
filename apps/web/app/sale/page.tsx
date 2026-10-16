@@ -16,6 +16,7 @@ import {
 import { PAYMENT_METHOD_LABELS, PAYMENT_METHODS, PaymentMethod } from '../../lib/config';
 import { formatFcfa } from '../../lib/format';
 import Receipt, { ReceiptData } from '../components/Receipt';
+import { phoneOnly, PHONE_MAX_LENGTH } from '../../lib/inputs';
 
 interface CartLine {
   product: ProductRow;
@@ -294,7 +295,8 @@ export default function SalePage() {
                       <input
                         className="field-input mt-2 !py-1.5 text-sm"
                         value={newCustomerPhone}
-                        onChange={(e) => setNewCustomerPhone(e.target.value.replace(/[^0-9+]/g, ''))}
+                        onChange={(e) => setNewCustomerPhone(phoneOnly(e.target.value))}
+                        maxLength={PHONE_MAX_LENGTH}
                         placeholder="Téléphone (optionnel)"
                         inputMode="tel"
                       />

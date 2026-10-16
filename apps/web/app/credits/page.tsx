@@ -17,6 +17,7 @@ import { listCustomersOnline as apiListCustomers, getCustomerDetail as apiGetCus
 import { formatDateTime, formatFcfa } from '../../lib/format';
 import { syncEngine } from '../../lib/sync';
 import { MONEY_CHANNEL_LABELS, MONEY_CHANNELS, MoneyChannel } from '../../lib/config';
+import { phoneOnly, PHONE_MAX_LENGTH } from '../../lib/inputs';
 
 interface CustomerListItem {
   id: string; // id serveur (en ligne) ou client_uuid local (hors-ligne)
@@ -194,7 +195,8 @@ export default function CreditsPage() {
             <input
               className="field-input"
               value={newPhone}
-              onChange={(e) => setNewPhone(e.target.value.replace(/[^0-9+]/g, ''))}
+              onChange={(e) => setNewPhone(phoneOnly(e.target.value))}
+              maxLength={PHONE_MAX_LENGTH}
               placeholder="Téléphone (optionnel)"
               inputMode="tel"
             />

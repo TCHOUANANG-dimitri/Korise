@@ -6,6 +6,7 @@ import { ArrowLeft, Building2, Check, Copy, KeyRound, Search } from 'lucide-reac
 
 import { ApiError, recoverBusinessCode, RecoverCodeResult } from '../../lib/api';
 import Logo from '../components/Logo';
+import { phoneOnly, PHONE_MAX_LENGTH, PHONE_PLACEHOLDER } from '../../lib/inputs';
 
 export default function RecoverCodePage() {
   const router = useRouter();
@@ -103,10 +104,12 @@ export default function RecoverCodePage() {
               <input
                 id="owner_phone"
                 className="field-input mb-5"
-                placeholder="ex. 6 90 00 00 00"
+                placeholder={PHONE_PLACEHOLDER}
+                type="tel"
                 inputMode="tel"
+                maxLength={PHONE_MAX_LENGTH}
                 value={ownerPhone}
-                onChange={(e) => setOwnerPhone(e.target.value)}
+                onChange={(e) => setOwnerPhone(phoneOnly(e.target.value))}
                 required
               />
               <p className="mb-4 text-xs leading-relaxed text-text-muted">

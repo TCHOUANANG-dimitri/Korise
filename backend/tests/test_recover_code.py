@@ -21,7 +21,7 @@ def _register_business(client, pin="1234"):
     identity = {
         "business_name": f"Boutique Awa {suffix}",
         "owner_full_name": f"Awa Ngo {suffix}",
-        "owner_phone": f"69{suffix}"[:12],
+        "owner_phone": "69" + str(uuid.uuid4().int)[:9],
     }
     r = client.post(
         "/auth/register-business",
@@ -67,7 +67,7 @@ def test_recover_code_message_does_not_leak_existence(client):
     _register_business(client)
     r = client.post(
         "/auth/recover-code",
-        json={"business_name": "Nimporte", "owner_full_name": "X", "owner_phone": "000"},
+        json={"business_name": "Nimporte", "owner_full_name": "X", "owner_phone": "600000000"},
     )
     assert r.status_code == 404
     assert "Aucune entreprise" in r.json()["detail"]

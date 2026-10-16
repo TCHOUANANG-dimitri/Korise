@@ -16,6 +16,7 @@ import {
 import { syncEngine } from '../../lib/sync';
 import { fetchExpectedCash } from '../../lib/api';
 import { formatDate, formatFcfa, localDateKey } from '../../lib/format';
+import { digitsOnly } from '../../lib/inputs';
 
 const STEPS = ['Jour', 'Caisse', 'MoMo', 'Orange Money', 'Stock', 'Motif', 'Valider'];
 
@@ -204,12 +205,10 @@ export default function ClosingPage() {
             </label>
             <input
               id="actual_cash"
-              type="number"
               inputMode="numeric"
-              min={0}
               className="field-input"
               value={cashCounted}
-              onChange={(e) => setCashCounted(e.target.value)}
+              onChange={(e) => setCashCounted(digitsOnly(e.target.value))}
               placeholder="ex. 45000"
               autoFocus
             />
@@ -231,12 +230,10 @@ export default function ClosingPage() {
             </label>
             <input
               id="actual_momo"
-              type="number"
               inputMode="numeric"
-              min={0}
               className="field-input"
               value={momoCounted}
-              onChange={(e) => setMomoCounted(e.target.value)}
+              onChange={(e) => setMomoCounted(digitsOnly(e.target.value))}
               placeholder="ex. 18500"
               autoFocus
             />
@@ -258,12 +255,10 @@ export default function ClosingPage() {
             </label>
             <input
               id="actual_orange"
-              type="number"
               inputMode="numeric"
-              min={0}
               className="field-input"
               value={orangeCounted}
-              onChange={(e) => setOrangeCounted(e.target.value)}
+              onChange={(e) => setOrangeCounted(digitsOnly(e.target.value))}
               placeholder="ex. 9000"
               autoFocus
             />

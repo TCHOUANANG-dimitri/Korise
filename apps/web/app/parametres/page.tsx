@@ -8,6 +8,7 @@ import { getSession } from '../../lib/session';
 import { APP_VERSION, getDeviceKey, getPlatform } from '../../lib/telemetry';
 import { getLockMinutes, setLockMinutes } from '../../lib/lock';
 import DeleteAccountCard from '../components/DeleteAccountCard';
+import { phoneOnly, PHONE_MAX_LENGTH, PHONE_PLACEHOLDER } from '../../lib/inputs';
 
 // Réduit le logo côté navigateur (≤ 256 px, PNG) avant envoi : le serveur le range dans la
 // fiche entreprise et l'utilise dans les PDF (reçus, factures, rapports).
@@ -120,7 +121,7 @@ export default function SettingsPage() {
           <Field label="Nom de l’entreprise" value={form.name} disabled={!isOwner} onChange={(v) => setForm({ ...form, name: v })} />
           <Field label="Activité / secteur" value={form.sector} disabled={!isOwner} onChange={(v) => setForm({ ...form, sector: v })} />
           <Field label="Adresse" value={form.address} disabled={!isOwner} onChange={(v) => setForm({ ...form, address: v })} />
-          <Field label="Téléphone" value={form.phone} disabled={!isOwner} onChange={(v) => setForm({ ...form, phone: v })} />
+          <Field label="Téléphone" value={form.phone} disabled={!isOwner} tel onChange={(v) => setForm({ ...form, phone: phoneOnly(v) })} />
           <Field label="Email" value={form.email} disabled={!isOwner} onChange={(v) => setForm({ ...form, email: v })} />
           <div>
             <p className="field-label">Devise</p>
@@ -176,11 +177,17 @@ export default function SettingsPage() {
   );
 }
 
-function Field({ label, value, onChange, disabled }: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean }) {
+function Field({ label, value, onChange, disabled, tel }: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean; tel?: boolean }) {
   return (
     <div>
       <label className="field-label">{label}</label>
-      <input className="field-input" value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} />
+      <input
+        className="field-input"
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+        {...(tel ? { type: 'tel', inputMode: 'tel' as const, maxLength: PHONE_MAX_LENGTH, placeholder: PHONE_PLACEHOLDER } : {})}
+      />
     </div>
   );
 }

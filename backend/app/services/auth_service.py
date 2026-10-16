@@ -22,6 +22,7 @@ from app.schemas.auth import (
     TokenResponse,
     UpdateEmployeeRequest,
 )
+from app.schemas.validators import normalize_phone
 
 CODE_ALPHABET = string.ascii_uppercase + string.digits
 
@@ -135,16 +136,18 @@ def recover_business_code(session: Session, request: RecoverCodeRequest, client=
     candidates = session.exec(
         select(Business).where(Business.name == request.business_name.strip())
     ).all()
+    # Téléphones comparés normalisés (sans espaces/tirets) : les comptes créés avant la
+    # validation du format peuvent avoir été enregistrés « 6 90 00 00 00 ».
     for candidate in candidates:
-        owner = session.exec(
+        owners = session.exec(
             select(User).where(
                 User.business_id == candidate.id,
                 User.role == UserRole.owner,
                 User.is_active == True,  # noqa: E712
                 User.full_name == request.owner_full_name.strip(),
-                User.phone == request.owner_phone.strip(),
             )
-        ).first()
+        ).all()
+        owner = next((o for o in owners if normalize_phone(o.phone) == request.owner_phone), None)
         if owner is not None:
             business = candidate
             break

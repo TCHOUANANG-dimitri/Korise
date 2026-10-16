@@ -1,17 +1,18 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.models.user import UserRole
+from app.schemas.validators import NewPin, Phone, RequiredPhone
 
 
 class RegisterBusinessRequest(BaseModel):
     business_name: str
     sector: str | None = None
     owner_full_name: str
-    owner_phone: str | None = None
-    pin: str = Field(min_length=4, max_length=8)
+    owner_phone: Phone = None
+    pin: NewPin
     signup_source: str | None = None
     """Canal d'acquisition (lien traçable de la landing). Normalisé côté service ; une valeur
     invalide est ignorée, jamais une raison de refuser l'inscription."""
@@ -50,7 +51,7 @@ class RecoverCodeRequest(BaseModel):
 
     business_name: str
     owner_full_name: str
-    owner_phone: str
+    owner_phone: RequiredPhone
 
 
 class RecoverCodeResponse(BaseModel):
@@ -60,8 +61,8 @@ class RecoverCodeResponse(BaseModel):
 
 class CreateEmployeeRequest(BaseModel):
     full_name: str
-    phone: str | None = None
-    pin: str = Field(min_length=4, max_length=8)
+    phone: Phone = None
+    pin: NewPin
     can_view_purchase_prices: bool = False
     can_view_owner_dashboard: bool = False
 
